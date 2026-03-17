@@ -2,22 +2,22 @@ import { createConfig, http } from 'wagmi'
 import { base } from 'wagmi/chains'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
-  metaMaskWallet,
+  injectedWallet,
   coinbaseWallet,
   walletConnectWallet,
-  rabbyWallet,
+  rainbowWallet,
 } from '@rainbow-me/rainbowkit/wallets'
 
 const connectors = connectorsForWallets(
   [
     {
       groupName: 'Recommended',
-      wallets: [metaMaskWallet, coinbaseWallet, rabbyWallet, walletConnectWallet],
+      wallets: [injectedWallet, coinbaseWallet, rainbowWallet, walletConnectWallet],
     },
   ],
   {
     appName: 'Based Trenches',
-    projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? 'YOUR_WALLETCONNECT_PROJECT_ID',
+    projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? 'cc1358b5e311a1f844c1d6482633c78d',
   }
 )
 
@@ -29,11 +29,12 @@ export const config = createConfig({
   },
 })
 
-// Contract addresses — update when deployed
+export const BASE_WSS = process.env.NEXT_PUBLIC_BASE_WSS ?? ''
+
 export const CONTRACTS = {
-  factory:    '0x0000000000000000000000000000000000000000',
-  warChest:   '0x0000000000000000000000000000000000000000',
-  platform:   '0x8e6Dc9387eD021DfCf59EC4a97006491d29E1262',
+  factory:  process.env.NEXT_PUBLIC_FACTORY_ADDRESS   ?? '0x0000000000000000000000000000000000000000',
+  warChest: process.env.NEXT_PUBLIC_WAR_CHEST_ADDRESS ?? '0x0000000000000000000000000000000000000000',
+  platform: process.env.NEXT_PUBLIC_PLATFORM_WALLET   ?? '0xC022B75D302AF292328cc0C056c7310552E74c8E',
 } as const
 
-export const CHAIN_ID = 8453 // Base
+export const CHAIN_ID = 8453

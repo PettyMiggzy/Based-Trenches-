@@ -5,7 +5,7 @@ export interface Token {
   symbol: string
   emoji: string
   creator: string
-  description: string
+  description?: string
   imageUrl?: string
   twitter?: string
   telegram?: string
