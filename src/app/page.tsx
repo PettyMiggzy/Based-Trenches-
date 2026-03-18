@@ -64,4 +64,19 @@ export default function HomePage() {
       <WarChestBar />
       <StatsBar />
 
-      <div style={{ background: 'linear-gradient(90deg,rgba(200,144,10,0.06) 0%,rgba(240,176,32,0.12) 50%,rgba(200,144,10,0.06) 100%)', borderTop: '1px soli
+      <div style={{ background: 'linear-gradient(90deg,rgba(200,144,10,0.06) 0%,rgba(240,176,32,0.12) 50%,rgba(200,144,10,0.06) 100%)', borderTop: '1px solid rgba(240,176,32,0.3)', borderBottom: '1px solid rgba(240,176,32,0.3)', padding: '0.75rem 2rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '11px', color: '#060504', background: 'var(--gold-b)', padding: '3px 10px', letterSpacing: '0.12em', flexShrink: 0 }}>🎖 Broke Out</div>
+        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--gold-b)', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 700 }}>$DRILLZ</span>
+          <span style={{ color: 'var(--gold)' }}>reached 3 ETH · Creator +0.25 ETH · LP deployed · 14 min ago</span>
+        </div>
+        <div style={{ marginLeft: 'auto', fontFamily: 'Oswald, sans-serif', fontSize: '12px', fontWeight: 600, color: 'var(--gold-b)', flexShrink: 0 }}>⚡ War Chest +0.14 ETH</div>
+      </div>
+
+      <TheWire />
+      <TrendingTrenches />
+      <CombatLog />
+      <HowItWorks />
+    </>
+  )
+}
