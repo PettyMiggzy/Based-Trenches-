@@ -30,9 +30,9 @@ export default function HomePage() {
           <Link href="/launch" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '15px', color: '#060504', background: 'linear-gradient(135deg,#b87040,#d4956a)', border: 'none', padding: '0.75rem 2rem', letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', display: 'inline-block', clipPath: 'polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)' }}>
             Launch A Token
           </Link>
-          <button style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--copper)', background: 'transparent', border: '1px solid rgba(184,112,64,0.4)', padding: '0.75rem 2rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'crosshair' }}>
-            View Live Trenches
-          </button>
+          <Link href="/trenches" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--copper)', background: 'transparent', border: '1px solid rgba(184,112,64,0.4)', padding: '0.75rem 2rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'crosshair', textDecoration: 'none', display: 'inline-block' }}>
+             View Live Trenches
+        </Link>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1px', background: 'var(--border)', border: '1px solid var(--border)', maxWidth: '720px', width: '100%' }}>
           {[{v:'1,247+',l:'Tokens Launched'},{v:'89 ETH',l:'Total Volume'},{v:'34',l:'Broke Out'},{v:'1.74 ETH',l:'War Chest'}].map(s => (
