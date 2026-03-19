@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -10,6 +10,44 @@ import { TheWire } from '../components/TheWire'
 import { TrendingTrenches } from '../components/TrendingTrenches'
 import { CombatLog } from '../components/CombatLog'
 import { HowItWorks } from '../components/HowItWorks'
+
+function HeroStats() {
+  const [total, setTotal]    = useState<number | null>(null)
+  const [grads, setGrads]    = useState<number | null>(null)
+  const [chest, setChest]    = useState<string>('—')
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res  = await fetch('/api/tokens')
+        const data = await res.json()
+        setTotal(data.total || 0)
+        setGrads((data.tokens || []).filter((t: any) => t.graduated).length)
+      } catch (_) {}
+    }
+    load()
+    const i = setInterval(load, 30000)
+    return () => clearInterval(i)
+  }, [])
+
+  const stats = [
+    { v: total !== null ? `${total}` : '—', l: 'Tokens Launched' },
+    { v: '—',                                l: 'Total Volume'    },
+    { v: grads !== null ? `${grads}` : '—', l: 'Broke Out'       },
+    { v: chest,                              l: 'War Chest'       },
+  ]
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1px', background: 'var(--border)', border: '1px solid var(--border)', maxWidth: '720px', width: '100%' }}>
+      {stats.map(s => (
+        <div key={s.l} style={{ background: 'var(--panel)', padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '24px', color: 'var(--copper-l)' }}>{s.v}</div>
+          <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--grey-l)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.l}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function HomePage() {
   const router = useRouter()
@@ -31,17 +69,10 @@ export default function HomePage() {
             Launch A Token
           </Link>
           <Link href="/trenches" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--copper)', background: 'transparent', border: '1px solid rgba(184,112,64,0.4)', padding: '0.75rem 2rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'crosshair', textDecoration: 'none', display: 'inline-block' }}>
-             View Live Trenches
-        </Link>
+            View Live Trenches
+          </Link>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1px', background: 'var(--border)', border: '1px solid var(--border)', maxWidth: '720px', width: '100%' }}>
-          {[{v:'1,247+',l:'Tokens Launched'},{v:'89 ETH',l:'Total Volume'},{v:'34',l:'Broke Out'},{v:'1.74 ETH',l:'War Chest'}].map(s => (
-            <div key={s.l} style={{ background: 'var(--panel)', padding: '1.25rem 1.5rem', textAlign: 'center' }}>
-              <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '24px', color: 'var(--copper-l)' }}>{s.v}</div>
-              <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--grey-l)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.l}</div>
-            </div>
-          ))}
-        </div>
+        <HeroStats />
       </section>
       <TickerTape />
       <WarChestBar />
