@@ -7,35 +7,28 @@ const client = createPublicClient({ chain: base, transport: http('https://mainne
 
 const FACTORY_ABI = [
   {
-    name: 'tokenInfo',
+    name: 'getTokenData',
     type: 'function',
     stateMutability: 'view',
-    inputs: [{ name: 'token', type: 'address' }],
-    outputs: [{
-      type: 'tuple',
-      components: [
-        { name: 'name',        type: 'string'  },
-        { name: 'symbol',      type: 'string'  },
-        { name: 'imageUri',    type: 'string'  },
-        { name: 'description', type: 'string'  },
-        { name: 'website',     type: 'string'  },
-        { name: 'twitter',     type: 'string'  },
-        { name: 'telegram',    type: 'string'  },
-        { name: 'creator',     type: 'address' },
-        { name: 'curve',       type: 'address' },
-        { name: 'armory',      type: 'address' },
-        { name: 'fortify',     type: 'address' },
-        { name: 'launchedAt',  type: 'uint256' },
-        { name: 'graduated',   type: 'bool'    },
-      ],
-    }],
+    inputs: [{ name: 't', type: 'address' }],
+    outputs: [
+      { name: 'curve',    type: 'address' },
+      { name: 'armory',   type: 'address' },
+      { name: 'fortify',  type: 'address' },
+      { name: 'graduated', type: 'bool'   },
+    ],
   },
 ] as const
 
+const TOKEN_ABI = [
+  { name: 'name',        type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string'  }] },
+  { name: 'symbol',      type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string'  }] },
+  { name: 'totalSupply', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+] as const
+
 const CURVE_ABI = [
-  { name: 'totalRaised',      type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'TARGET',           type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'getCurrentPrice',  type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+  { name: 'totalRaised', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+  { name: 'TARGET',      type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
 ] as const
 
 const ARMORY_ABI = [
@@ -49,56 +42,55 @@ export async function GET(
   const address = params.id as `0x${string}`
 
   try {
-    const info = await client.readContract({
+    // Get factory data
+    const [curve, armory, fortify, graduated] = await client.readContract({
       address: FACTORY,
       abi: FACTORY_ABI,
-      functionName: 'tokenInfo',
+      functionName: 'getTokenData',
       args: [address],
-    }) as any
+    }) as [`0x${string}`, `0x${string}`, `0x${string}`, boolean]
 
-    let bondedEth = 0, bondTarget = 3, priceEth = 0, armoryBalance = 0
+    // Get token name/symbol
+    const [name, symbol] = await Promise.all([
+      client.readContract({ address, abi: TOKEN_ABI, functionName: 'name' }),
+      client.readContract({ address, abi: TOKEN_ABI, functionName: 'symbol' }),
+    ]) as [string, string]
+
+    // Bonding curve
+    let bondedEth = 0, bondTarget = 3, armoryBalance = 0
 
     try {
       const [raised, target] = await Promise.all([
-        client.readContract({ address: info.curve, abi: CURVE_ABI, functionName: 'totalRaised' }),
-        client.readContract({ address: info.curve, abi: CURVE_ABI, functionName: 'TARGET' }),
+        client.readContract({ address: curve, abi: CURVE_ABI, functionName: 'totalRaised' }),
+        client.readContract({ address: curve, abi: CURVE_ABI, functionName: 'TARGET' }),
       ])
       bondedEth = parseFloat(formatEther(raised as bigint))
       bondTarget = parseFloat(formatEther(target as bigint))
-
-      // getCurrentPrice optional
-      try {
-        const price = await client.readContract({ address: info.curve, abi: CURVE_ABI, functionName: 'getCurrentPrice' })
-        priceEth = parseFloat(formatEther(price as bigint))
-      } catch {}
-    } catch {}
+    } catch (_) {}
 
     try {
-      const bal = await client.readContract({ address: info.armory, abi: ARMORY_ABI, functionName: 'balance' })
+      const bal = await client.readContract({ address: armory, abi: ARMORY_ABI, functionName: 'balance' })
       armoryBalance = parseFloat(formatEther(bal as bigint))
-    } catch {}
+    } catch (_) {}
 
     const bondPercent = bondTarget > 0 ? Math.min(100, (bondedEth / bondTarget) * 100) : 0
 
     return NextResponse.json({
       address,
-      name: info.name,
-      symbol: info.symbol,
-      imageUrl: info.imageUri || '',
-      description: info.description || '',
-      website: info.website || '',
-      twitter: info.twitter || '',
-      telegram: info.telegram || '',
-      creator: info.creator,
-      curve: info.curve,
-      armory: info.armory,
-      fortify: info.fortify,
-      launchedAt: Number(info.launchedAt),
-      graduated: info.graduated,
+      name,
+      symbol,
+      imageUrl: '',
+      description: '',
+      creator: '',
+      curve,
+      armory,
+      fortify,
+      launchedAt: 0,
+      graduated,
       bondedEth,
       bondTarget,
       bondPercent,
-      priceEth,
+      priceEth: 0,
       armoryBalance,
       marketCap: Math.round(bondedEth * 1500 * 100),
       volume24h: 0,
