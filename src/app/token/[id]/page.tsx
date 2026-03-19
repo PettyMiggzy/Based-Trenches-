@@ -108,8 +108,8 @@ export default function TokenPage() {
           {/* Token header */}
           <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', padding: '1.5rem', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-              {token.imageUri ? (
-                <img src={token.imageUri} alt={token.symbol} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--copper)' }} />
+              {token.imageUrl ? (
+                <img src={token.imageUrl} alt={token.symbol} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--copper)' }} />
               ) : (
                 <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--bg)', border: '2px solid var(--copper)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>🪖</div>
               )}

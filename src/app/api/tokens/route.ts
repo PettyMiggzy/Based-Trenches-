@@ -135,7 +135,7 @@ export async function GET() {
             address: addr,
             name: info.name,
             symbol: info.symbol,
-            imageUri: info.imageUri || '',
+            imageUrl: info.imageUri || '',
             description: info.description || '',
             website: info.website || '',
             twitter: info.twitter || '',

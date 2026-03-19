@@ -78,8 +78,8 @@ function WireCard({ token }: { token: Token }) {
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {token.imageUri ? (
-            <img src={token.imageUri} alt={token.symbol} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
+          {token.imageUrl ? (
+            <img src={token.imageUrl} alt={token.symbol} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
           ) : (
             <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>🪖</div>
           )}
