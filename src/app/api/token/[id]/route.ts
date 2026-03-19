@@ -44,9 +44,9 @@ const ARMORY_ABI = [
 
 export async function GET(
   _req: Request,
-  { params }: { params: { address: string } }
+  { params }: { params: { id: string } }
 ) {
-  const address = params.address as `0x${string}`
+  const address = params.id as `0x${string}`
 
   try {
     const info = await client.readContract({
