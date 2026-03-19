@@ -67,14 +67,14 @@ export default function TokenPage() {
         abi: CURVE_ABI,
         functionName: 'buy',
         value: parseEther(amount),
-        args: [0n], // minTokens = 0 for now (no slippage protection UI yet)
+        args: [BigInt(0)], // minTokens = 0
       })
     } else {
       writeContract({
         address: token.curve,
         abi: CURVE_ABI,
         functionName: 'sell',
-        args: [parseEther(amount), 0n],
+        args: [parseEther(amount), BigInt(0)],
       })
     }
   }
