@@ -1,0 +1,331 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\ArmoryVault.sol": {
+      "lastModificationDate": 1773861396229,
+      "contentHash": "224c4566e2a790030984881aea0d0acd",
+      "sourceName": "contracts/ArmoryVault.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Shared.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ArmoryVault"
+      ]
+    },
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\Shared.sol": {
+      "lastModificationDate": 1773861396390,
+      "contentHash": "21182b7ee63b4baf5a22d4f0ec1e4649",
+      "sourceName": "contracts/Shared.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20",
+        "IPositionManager",
+        "ISwapRouter",
+        "IUniV3Factory",
+        "IUniV3Pool",
+        "IWETH",
+        "Sqrt"
+      ]
+    },
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\WarChest.sol": {
+      "lastModificationDate": 1773861396411,
+      "contentHash": "687b947a4ee2f602b942007d41a5e60c",
+      "sourceName": "contracts/WarChest.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Shared.sol",
+        "./ProtocolVault.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "WarChest"
+      ]
+    },
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\ProtocolVault.sol": {
+      "lastModificationDate": 1773861396365,
+      "contentHash": "cf7fc906581a32822ea720083524a9b3",
+      "sourceName": "contracts/ProtocolVault.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Shared.sol",
+        "./BasedToken.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IWarChest",
+        "ProtocolVault"
+      ]
+    },
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\BasedToken.sol": {
+      "lastModificationDate": 1773861396259,
+      "contentHash": "6c94f4f9e7a7b9813ac50476ca535c18",
+      "sourceName": "contracts/BasedToken.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Shared.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "BasedToken"
+      ]
+    },
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\Fortify.sol": {
+      "lastModificationDate": 1773861396326,
+      "contentHash": "0f15f5696ae851b4f6f90dda68f8a863",
+      "sourceName": "contracts/Fortify.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Shared.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Fortify"
+      ]
+    },
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\BondingCurve.sol": {
+      "lastModificationDate": 1773861396296,
+      "contentHash": "06b54900d96d85a7491e6495e3124c47",
+      "sourceName": "contracts/BondingCurve.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Shared.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "BondingCurve",
+        "IProtocolVault"
+      ]
+    },
+    "C:\\Users\\samah\\Desktop\\BasedTrenches\\basedtrenches-deploy\\contracts\\BasedTrenchesFactory.sol": {
+      "lastModificationDate": 1773861396279,
+      "contentHash": "d64b0e90f764d51b96f2fd4ba0a4c203",
+      "sourceName": "contracts/BasedTrenchesFactory.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1
+          },
+          "viaIR": true,
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Shared.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "BasedTrenchesFactory",
+        "IArmoryVault",
+        "IBasedToken",
+        "IBondingCurve",
+        "IFortify",
+        "IProtocolVault",
+        "IWarChest"
+      ]
+    }
+  }
+}
