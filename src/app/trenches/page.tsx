@@ -31,7 +31,7 @@ export default function TrenchesPage() {
     const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.symbol.toLowerCase().includes(search.toLowerCase())
     const matchFilter =
       filter === 'All'          ? true :
-      filter === 'New'          ? (Date.now() / 1000 - t.launchedAt) < 7200 :
+      filter === 'New'          ? t.badge === 'new' || t.bondPercent < 5 :
       filter === 'Trending'     ? t.bondPercent > 20 && t.bondPercent < 80 :
       filter === 'Hot'          ? t.volume24h > 0.1 :
       filter === 'Near Breakout'? t.bondPercent >= 75 :
