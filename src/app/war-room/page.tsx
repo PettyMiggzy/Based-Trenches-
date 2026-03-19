@@ -1,118 +1,222 @@
-import { CombatLog } from '../../components/CombatLog'
+'use client'
+import { useState, useEffect } from 'react'
+import { createPublicClient, http, formatEther } from 'viem'
+import { base } from 'viem/chains'
+import Link from 'next/link'
+
+const WAR_CHEST = '0x34FA3E260484063cD9988380dD581642FC15c0BC' as const
+const CHEST_ABI = [
+  { name: 'balance',   type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+  { name: 'maxPayout', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+  { name: 'threshold', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+] as const
 
 export default function WarRoomPage() {
+  const [chest, setChest] = useState({ bal: 0, max: 2, thresh: 1, loaded: false })
+  const [tokens, setTokens] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Fetch real War Chest balance from chain
+    const client = createPublicClient({ chain: base, transport: http('https://mainnet.base.org') })
+    async function loadChest() {
+      try {
+        const [b, m, t] = await Promise.all([
+          client.readContract({ address: WAR_CHEST, abi: CHEST_ABI, functionName: 'balance'   }).catch(() => BigInt(0)),
+          client.readContract({ address: WAR_CHEST, abi: CHEST_ABI, functionName: 'maxPayout' }).catch(() => BigInt(2e18)),
+          client.readContract({ address: WAR_CHEST, abi: CHEST_ABI, functionName: 'threshold' }).catch(() => BigInt(1e18)),
+        ])
+        setChest({ bal: parseFloat(formatEther(b as bigint)), max: parseFloat(formatEther(m as bigint)), thresh: parseFloat(formatEther(t as bigint)), loaded: true })
+      } catch (_) { setChest(c => ({ ...c, loaded: true })) }
+    }
+
+    // Fetch real tokens for raids/breakouts
+    async function loadTokens() {
+      try {
+        const res  = await fetch('/api/tokens')
+        const data = await res.json()
+        setTokens(data.tokens || [])
+      } catch (_) {}
+      finally { setLoading(false) }
+    }
+
+    loadChest()
+    loadTokens()
+    const i = setInterval(() => { loadChest(); loadTokens() }, 30000)
+    return () => clearInterval(i)
+  }, [])
+
+  const pct       = chest.max > 0 ? Math.min(100, (chest.bal / chest.max) * 100) : 0
+  const active    = chest.bal >= chest.thresh
+  const graduated = tokens.filter(t => t.graduated)
+  const nearGrad  = tokens.filter(t => !t.graduated && t.bondPercent >= 75).sort((a, b) => b.bondPercent - a.bondPercent)
+  const hotTokens = tokens.filter(t => !t.graduated && t.bondPercent > 20).sort((a, b) => b.bondPercent - a.bondPercent)
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', minHeight: 'calc(100vh - 56px)' }}>
+    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '2rem', display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem', alignItems: 'start' }}>
 
-      {/* ── MAIN ── */}
-      <div style={{ padding: '1.5rem 2rem', borderRight: '1px solid var(--border)' }}>
+      {/* LEFT */}
+      <div>
+        {/* War Chest — REAL DATA */}
+        <div style={{ background: 'var(--panel)', border: '1px solid rgba(240,176,32,0.3)', padding: '2rem', marginBottom: '2rem', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '11px', fontWeight: 700, color: 'var(--gold-b)', letterSpacing: '0.2em', marginBottom: '0.5rem' }}>
+            ⚡ WAR CHEST — GLOBAL JACKPOT
+          </div>
+          <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '52px', color: chest.loaded ? 'var(--gold-b)' : 'var(--grey)', marginBottom: '0.25rem' }}>
+            {chest.loaded ? `${chest.bal.toFixed(3)} ETH` : '— ETH'}
+          </div>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '13px', color: active ? 'var(--gold-b)' : 'var(--grey-l)', marginBottom: '1.5rem' }}>
+            {chest.loaded
+              ? active
+                ? `ACTIVE · NEXT BREAKOUT WINS UP TO ${chest.max} ETH`
+                : `BUILDING · ACTIVATES AT ${chest.thresh} ETH`
+              : 'Loading...'
+            }
+          </div>
 
-        {/* War Chest Hero */}
-        <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', padding: '2rem', marginBottom: '1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-          <div className="stripe-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '11px', fontWeight: 700, color: 'var(--gold)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>⚡ War Chest — Global Jackpot</div>
-            <div className="animate-logo-glow" style={{ fontFamily: 'Black Ops One, cursive', fontSize: '56px', color: 'var(--gold-b)', lineHeight: 1 }}>1.74 ETH</div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--gold)', marginTop: '0.5rem', marginBottom: '1.5rem' }}>ACTIVE · NEXT BREAKOUT WINS UP TO 2 ETH</div>
-            <div style={{ maxWidth: '400px', margin: '0 auto 1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '14px', color: 'var(--gold-b)' }}>1.74 / 2 ETH MAX</span>
-              </div>
-              <div style={{ height: '10px', background: 'rgba(200,144,10,0.08)', border: '1px solid rgba(200,144,10,0.15)', position: 'relative' }}>
-                <div style={{ height: '100%', width: '87%', background: 'linear-gradient(90deg,var(--gold),var(--gold-b))', position: 'relative' }}>
-                  <div style={{ position: 'absolute', right: '-2px', top: '-3px', bottom: '-3px', width: '4px', background: 'white', boxShadow: '0 0 8px 3px rgba(255,255,255,0.7)', borderRadius: '2px' }} />
-                </div>
-              </div>
+          {/* Progress bar */}
+          <div style={{ marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--grey-l)' }}>{chest.bal.toFixed(3)} ETH</span>
+              <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--grey-l)' }}>{chest.max} ETH MAX</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              {[['50%','Liquidity Boost'],['30%','Random Buyers'],['20%','Last Buyer']].map(([p,l]) => (
-                <div key={l} style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', padding: '5px 12px', border: '1px solid rgba(200,144,10,0.25)', background: 'rgba(200,144,10,0.06)', color: 'var(--gold)' }}>
-                  <strong style={{ color: 'var(--gold-b)' }}>{p}</strong> {l}
-                </div>
+            <div style={{ height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: 0 }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,var(--gold-b),#f0c040)', transition: 'width 0.5s' }} />
+            </div>
+          </div>
+
+          {/* Payout split */}
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+            {[['50%', 'Liquidity Boost'], ['30%', 'Random Buyers'], ['20%', 'Last Buyer']].map(([p, l]) => (
+              <div key={l} style={{ fontFamily: 'Oswald, sans-serif', fontSize: '11px', color: 'var(--grey-l)', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)', padding: '4px 12px' }}>
+                <span style={{ color: 'var(--gold-b)', fontWeight: 700 }}>{p}</span> {l}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Active Raids — real tokens near breakout */}
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+            <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>Active Raids</span>
+            <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '9px', fontWeight: 700, color: 'var(--red-b)', background: 'rgba(255,51,17,0.1)', border: '1px solid rgba(255,51,17,0.3)', padding: '2px 6px', letterSpacing: '0.1em' }}>LIVE</span>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--red-b)' }} />
+          </div>
+          {loading ? (
+            <div style={{ padding: '2rem', border: '1px solid var(--border)', fontFamily: 'Oswald, sans-serif', fontSize: '13px', color: 'var(--grey-l)', textAlign: 'center' }}>Loading...</div>
+          ) : nearGrad.length === 0 ? (
+            <div style={{ padding: '2rem', border: '1px solid var(--border)', fontFamily: 'Oswald, sans-serif', fontSize: '13px', color: 'var(--grey-l)', textAlign: 'center' }}>
+              No active raids — tokens need 75%+ bonded to trigger raid mode
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              {nearGrad.slice(0, 4).map(t => (
+                <Link key={t.address} href={`/token/${t.address}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: 'var(--panel)', border: '1px solid rgba(255,51,17,0.3)', padding: '1.25rem', cursor: 'crosshair' }}>
+                    <div style={{ position: 'relative', height: '2px', background: 'linear-gradient(90deg,var(--red),var(--red-b))', marginBottom: '1rem', top: '-1.25rem', margin: '-1.25rem -1.25rem 1rem' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>${t.symbol}</span>
+                      <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--red-b)', background: 'rgba(255,51,17,0.15)', border: '1px solid rgba(255,51,17,0.4)', padding: '3px 8px', letterSpacing: '0.1em' }}>⚔ RAID ACTIVE</span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                      {[
+                        ['—', 'Buys'],
+                        [`${t.bondedEth.toFixed(2)} ETH`, 'Volume'],
+                        [`${t.bondPercent.toFixed(1)}%`, 'Bonded'],
+                      ].map(([v, l]) => (
+                        <div key={l}>
+                          <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--cream)' }}>{v}</div>
+                          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '9px', color: 'var(--grey)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{l}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)' }}>
+                      <div style={{ height: '100%', width: `${t.bondPercent}%`, background: 'linear-gradient(90deg,var(--red),var(--red-b))' }} />
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Active Raids */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-          <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>Active Raids</span>
-          <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--copper)', background: 'rgba(184,112,64,0.1)', border: '1px solid rgba(184,112,64,0.25)', padding: '2px 8px' }}>Live</span>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--red-b)', boxShadow: '0 0 6px var(--red-b)' }} className="animate-blink" />
-          <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg,var(--border),transparent)' }} />
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
-          {[
-            { sym:'💀 $MOLTOV', state:'⚔ RAID ACTIVE', pct:94, buys:9, time:'90s', vol:'+0.8 ETH', bond:'94.2%' },
-            { sym:'⚡ $SURGE',  state:'RAID STARTED',  pct:80, buys:5, time:'45s', vol:'+0.3 ETH', bond:'80%' },
-          ].map(r => (
-            <div key={r.sym} style={{ background: 'var(--panel)', border: '1px solid rgba(204,34,0,0.3)', padding: '1.25rem', position: 'relative', overflow: 'hidden' }}>
-              <div className="animate-crit-glow" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg,var(--red),var(--red-b))' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>{r.sym}</div>
-                <div className="animate-pulse-red" style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--red-b)', background: 'rgba(204,34,0,0.1)', border: '1px solid rgba(204,34,0,0.3)', padding: '3px 8px', letterSpacing: '0.12em' }}>{r.state}</div>
-              </div>
-              <div style={{ height: '8px', background: 'rgba(204,34,0,0.08)', border: '1px solid rgba(204,34,0,0.15)', marginBottom: '0.5rem', position: 'relative' }}>
-                <div style={{ height: '100%', width: `${r.pct}%`, background: 'linear-gradient(90deg,var(--red),var(--gold-b))' }} />
-              </div>
-              <div style={{ display: 'flex', gap: '1.5rem' }}>
-                {[[`${r.buys}`, 'buys'],[`in ${r.time}`, 'window'],[r.vol, 'volume'],[r.bond, 'bonded']].map(([v,l]) => (
-                  <div key={l}>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--cream)' }}>{v}</div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '9px', color: 'var(--grey)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{l}</div>
-                  </div>
-                ))}
-              </div>
+        {/* Recent Breakouts — real graduated tokens */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+            <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>Recent Breakouts</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+          </div>
+          {loading ? (
+            <div style={{ padding: '2rem', border: '1px solid var(--border)', fontFamily: 'Oswald, sans-serif', fontSize: '13px', color: 'var(--grey-l)', textAlign: 'center' }}>Loading...</div>
+          ) : graduated.length === 0 ? (
+            <div style={{ padding: '2rem', border: '1px solid var(--border)', fontFamily: 'Oswald, sans-serif', fontSize: '13px', color: 'var(--grey-l)', textAlign: 'center' }}>
+              No breakouts yet — first token to reach 3 ETH wins the War Chest
             </div>
-          ))}
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: 'var(--border)' }}>
+              {graduated.slice(0, 5).map(t => (
+                <Link key={t.address} href={`/token/${t.address}`} style={{ textDecoration: 'none' }}>
+                  <div style={{ background: 'var(--panel)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'crosshair' }}>
+                    <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--gold-b)', background: 'rgba(240,176,32,0.1)', border: '1px solid rgba(240,176,32,0.3)', padding: '3px 8px', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>⚡ BROKE OUT</span>
+                    <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '16px', color: 'var(--cream)' }}>${t.symbol}</span>
+                    <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '12px', color: 'var(--grey-l)', flex: 1 }}>3 ETH bonded · Creator +0.25 ETH · LP deployed</span>
+                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--grey)' }}>—</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
-
-        {/* Recent Breakouts */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-          <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>Recent Breakouts</span>
-          <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg,var(--border),transparent)' }} />
-        </div>
-        {[
-          { sym:'$DRILLZ', detail:'3 ETH bonded · Creator +0.25 ETH · LP deployed', time:'14m ago' },
-          { sym:'$TOSHI',  detail:'3 ETH bonded · Creator +0.25 ETH · LP deployed', time:'2h ago' },
-          { sym:'$DEGEN',  detail:'3 ETH bonded · War Chest awarded 1.4 ETH',       time:'6h ago' },
-        ].map(b => (
-          <div key={b.sym} style={{ background: 'var(--panel)', border: '1px solid rgba(240,176,32,0.2)', padding: '1rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: '#060504', background: 'var(--gold-b)', padding: '3px 8px', letterSpacing: '0.1em', flexShrink: 0 }}>🎖 BROKE OUT</div>
-            <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '16px', color: 'var(--cream)', flex: 1 }}>{b.sym}</div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--grey-l)' }}>{b.detail}</div>
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--grey)', flexShrink: 0 }}>{b.time}</div>
-          </div>
-        ))}
       </div>
 
-      {/* ── SIDEBAR ── */}
-      <div style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-          <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>Combat Log</span>
-          <div className="animate-blink" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--red-b)', boxShadow: '0 0 6px var(--red-b)' }} />
-        </div>
-        <CombatLog compact maxRows={10} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '1.5rem 0 1rem' }}>
-          <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '18px', color: 'var(--cream)' }}>Whale Alerts</span>
-          <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg,var(--border),transparent)' }} />
-        </div>
-        <div style={{ background: 'var(--panel)', border: '1px solid var(--border)' }}>
-          {[
-            { tok:'$WARZ — 0x1b3...9ea',   desc:'Single buy · bonding surge',     amt:'+0.6 ETH',  pos:true },
-            { tok:'$SURGE — 0x5f1...8b2',  desc:'Single buy · raid triggered',    amt:'+0.55 ETH', pos:true },
-            { tok:'$MOLTOV — 0x9f2...44a', desc:'Multiple buys · 94% bonded',     amt:'-0.21 ETH', pos:false },
-          ].map(w => (
-            <div key={w.tok} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', borderBottom: '1px solid rgba(184,112,64,0.06)' }}>
-              <div style={{ fontSize: '20px', flexShrink: 0 }}>🐋</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--cream)' }}>{w.tok}</div>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--grey-l)' }}>{w.desc}</div>
-              </div>
-              <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '16px', color: w.pos ? 'var(--green)' : 'var(--red-b)' }}>{w.amt}</div>
+      {/* RIGHT sidebar */}
+      <div>
+        {/* Live feed — real tokens activity */}
+        <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', padding: '1.25rem', marginBottom: '1rem' }}>
+          <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '14px', color: 'var(--cream)', marginBottom: '1rem' }}>Live Feed</div>
+          {loading ? (
+            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '12px', color: 'var(--grey-l)' }}>Loading...</div>
+          ) : hotTokens.length === 0 ? (
+            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '12px', color: 'var(--grey-l)' }}>No activity yet — launch a token to get started</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {hotTokens.slice(0, 8).map(t => (
+                <Link key={t.address} href={`/token/${t.address}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: '9px', fontWeight: 700, color: t.bondPercent > 75 ? 'var(--red-b)' : 'var(--copper)', letterSpacing: '0.08em' }}>
+                    {t.bondPercent > 75 ? '⚔ RAID' : '▲ BUY'}
+                  </span>
+                  <span style={{ fontFamily: 'Black Ops One, cursive', fontSize: '13px', color: 'var(--cream)' }}>${t.symbol}</span>
+                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--copper)', marginLeft: 'auto' }}>{t.bondPercent.toFixed(1)}%</span>
+                </Link>
+              ))}
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* Whale Alerts — real near-grad tokens */}
+        <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', padding: '1.25rem' }}>
+          <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '14px', color: 'var(--cream)', marginBottom: '1rem' }}>Whale Alerts</div>
+          {loading ? (
+            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '12px', color: 'var(--grey-l)' }}>Loading...</div>
+          ) : nearGrad.length === 0 ? (
+            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '12px', color: 'var(--grey-l)', lineHeight: 1.6 }}>
+              No whale activity yet.<br />
+              Large buys pushing tokens toward graduation will appear here.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {nearGrad.slice(0, 5).map(t => (
+                <Link key={t.address} href={`/token/${t.address}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '16px' }}>🐋</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '13px', color: 'var(--cream)' }}>${t.symbol}</div>
+                    <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', color: 'var(--grey-l)' }}>Bonding surge</div>
+                  </div>
+                  <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--red-b)', fontWeight: 700 }}>+{t.bondedEth.toFixed(2)} ETH</span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
