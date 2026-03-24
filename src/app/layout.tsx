@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import './globals.css'
+import '../styles/globals.css'
 import { Providers } from './providers'
-import { Navbar } from '../components/Navbar'
+import { Nav } from '../components/Nav'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://basedtrenches.fun'),
@@ -47,7 +47,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
-          <Navbar />
+          <Nav />
           <main>
             {children}
           </main>
