@@ -12,9 +12,8 @@ import { CombatLog } from '../components/CombatLog'
 import { HowItWorks } from '../components/HowItWorks'
 
 function HeroStats() {
-  const [total, setTotal]    = useState<number | null>(null)
-  const [grads, setGrads]    = useState<number | null>(null)
-  const [chest, setChest]    = useState<string>('—')
+  const [total, setTotal] = useState<number | null>(null)
+  const [grads, setGrads] = useState<number | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -34,7 +33,7 @@ function HeroStats() {
     { v: total !== null ? `${total}` : '—', l: 'Tokens Launched' },
     { v: '—',                                l: 'Total Volume'    },
     { v: grads !== null ? `${grads}` : '—', l: 'Broke Out'       },
-    { v: chest,                              l: 'War Chest'       },
+    { v: '—',                                l: 'War Chest'       },
   ]
 
   return (
@@ -53,6 +52,7 @@ export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
+    // Check cookie — works on BOTH basedtrenches.fun and basedtrenches.co
     const seen = document.cookie.split(';').some(c => c.trim().startsWith('bt_intro_seen='))
     if (!seen) router.push('/intro')
   }, [router])

@@ -9,7 +9,8 @@ export default function IntroPage() {
   const router = useRouter()
 
   const setCookie = () => {
-    document.cookie = 'bt_intro_seen=1; path=/; max-age=31536000'
+ document.cookie = 'bt_intro_seen=1; path=/; max-age=31536000; SameSite=Lax'
+document.cookie = 'bt_intro_seen=1; path=/; max-age=31536000; domain=.basedtrenches.co; SameSite=Lax'
   }
 
   useEffect(() => {
