@@ -64,7 +64,7 @@ export default function GuardPage() {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.5rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-              <span style={{ fontSize: '36px' }}>🛡</span>
+              <img src="/trenchguard.png" alt="Trench Guard" style={{ width: "52px", height: "52px", objectFit: "contain" }} />
               <div>
                 <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '28px', color: 'var(--cream)' }}>Trench Guard</div>
                 <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '12px', color: '#3a9948', letterSpacing: '0.12em' }}>WALLET PROTECTION · BASE CHAIN</div>
@@ -192,7 +192,7 @@ function RevokeTab({ address, isConnected, onConnect }: any) {
 
       if (data.status === '1' && data.result?.length) {
         // Get unique tokens from tx history
-        tokenContracts = [...new Set(data.result.map((tx: any) => tx.contractAddress.toLowerCase()))] as string[]
+        tokenContracts = Array.from(new Set(data.result.map((tx: any) => tx.contractAddress.toLowerCase()))) as string[]
         setScanMsg(`Found ${tokenContracts.length} tokens. Checking approvals...`)
       } else {
         // Fallback: use BT tokens if Basescan fails
