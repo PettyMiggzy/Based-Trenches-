@@ -5,11 +5,12 @@ import { usePathname } from 'next/navigation'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 const navLinks = [
-  { href: '/',          label: 'The Trenches' },
-  { href: '/launch',   label: 'Go To War' },
-  { href: '/war-room', label: 'War Room' },
-  { href: '/hq',       label: 'HQ' },
-  { href: '/docs',     label: 'Docs' },
+  { href: '/trenches',  label: 'The Trenches' },
+  { href: '/launch',    label: 'Go To War'    },
+  { href: '/war-room',  label: 'War Room'     },
+  { href: '/hq',        label: 'HQ'           },
+  { href: '/docs',      label: 'Docs'         },
+  { href: '/guard',     label: '🛡 Guard'      },
 ]
 
 export function Nav() {
@@ -24,83 +25,50 @@ export function Nav() {
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 2rem', height: '56px',
     }}>
-      {/* LEFT — Logo */}
+      {/* Logo */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <Image
-            src="/BT.png"
-            alt="Based Trenches"
-            width={36}
-            height={36}
-            style={{ borderRadius: '4px', objectFit: 'cover' }}
-            className="animate-logo-glow"
-          />
+          <Image src="/BT.png" alt="Based Trenches" width={32} height={32}
+            style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
         </Link>
-        <div>
-          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '15px', color: 'var(--cream)', letterSpacing: '0.05em' }}>
-            Based Trenches
-          </div>
-          <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--copper)', letterSpacing: '0.15em' }}>
-            ON BASE · DIG IN
-          </div>
-        </div>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '15px', color: 'var(--copper-l)', letterSpacing: '0.05em', lineHeight: 1 }}>Based Trenches</div>
+          <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '8px', color: 'var(--grey-l)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>On Base · Dig In</div>
+        </Link>
       </div>
 
-      {/* CENTER — Nav links */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.1rem' }}>
-        {navLinks.map(link => (
-          <Link
-            key={link.href}
-            href={link.href}
-            style={{
-              fontFamily: 'Oswald, sans-serif',
-              fontWeight: 500,
-              fontSize: '13px',
-              color: pathname === link.href ? 'var(--cream)' : 'var(--grey-l)',
-              padding: '0.4rem 0.8rem',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              textDecoration: 'none',
-              transition: 'color 0.2s',
-            }}
-          >
-            {link.label}
-          </Link>
-        ))}
+      {/* Links */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+        {navLinks.map(({ href, label }) => {
+          const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
+          const isGuard  = href === '/guard'
+          return (
+            <Link key={href} href={href} style={{
+              fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '12px',
+              letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
+              padding: '0.35rem 0.65rem',
+              color: isActive ? (isGuard ? '#3a9948' : 'var(--copper-l)') : isGuard ? 'rgba(58,153,72,0.8)' : 'var(--grey-l)',
+              borderBottom: isActive ? `2px solid ${isGuard ? '#3a9948' : 'var(--copper)'}` : '2px solid transparent',
+              transition: 'all 0.15s',
+            }}>
+              {label}
+            </Link>
+          )
+        })}
       </div>
 
-      {/* RIGHT — War Room + Connect */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <Link
-          href="/war-room"
-          className="animate-pulse-red"
-          style={{
-            fontFamily: 'Oswald, sans-serif',
-            fontWeight: 700,
-            fontSize: '12px',
-            color: 'var(--red-b)',
-            background: 'rgba(204,34,0,0.1)',
-            border: '1px solid rgba(204,34,0,0.3)',
-            padding: '0.35rem 0.8rem',
-            letterSpacing: '0.1em',
-            clipPath: 'polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)',
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-        >
-          <span className="animate-blink" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--red-b)', boxShadow: '0 0 6px var(--red-b)', display: 'inline-block' }} />
-          ⚔ WAR ROOM
+      {/* Right: War Room alert + wallet */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <Link href="/war-room" style={{
+          fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '11px',
+          letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none',
+          color: 'var(--red)', display: 'flex', alignItems: 'center', gap: '4px',
+          padding: '4px 10px', border: '1px solid rgba(255,51,17,0.3)',
+          background: 'rgba(255,51,17,0.06)',
+        }}>
+          <span style={{ fontSize: '8px' }}>✖</span> WAR ROOM
         </Link>
-
-        {/* RainbowKit connect — styled via theme in providers.tsx */}
-        <ConnectButton
-          label="Connect Wallet"
-          accountStatus="address"
-          chainStatus="none"
-          showBalance={false}
-        />
+        <ConnectButton />
       </div>
     </nav>
   )

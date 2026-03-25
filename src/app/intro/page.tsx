@@ -1,261 +1,139 @@
 'use client'
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+
+const SLIDES = [
+  {
+    title: 'Based Trenches',
+    sub: 'A memecoin launchpad on Base Chain.',
+    body: 'Tokens bond to 3 ETH on a smooth curve, graduate to Uniswap V3 automatically, and feed a global jackpot. Every holder has skin in the game.',
+    cta: 'SHOW ME HOW →',
+    skip: true,
+  },
+  {
+    title: 'Launch for $4',
+    sub: '0.002 ETH · 1B supply · ~$3K starting mcap',
+    body: 'Deploy your token in one transaction. Your token gets its own bonding curve, Armory vault, and staking pool — all deployed automatically on Base.',
+    cta: 'NEXT →',
+    skip: true,
+  },
+  {
+    title: 'Bond to 3 ETH',
+    sub: 'Smooth bonding curve · Auto-graduation',
+    body: 'Every buy pushes the price up the curve. Hit 3 ETH → instant graduation. 2.5 ETH + 200M tokens seeded to Uniswap V3. LP locked forever. 0.25 ETH goes straight to you.',
+    cta: 'NEXT →',
+    skip: true,
+  },
+  {
+    title: 'The War Chest',
+    sub: 'Global jackpot · Up to 2 ETH',
+    body: 'Every buy on every token feeds the War Chest. When it activates, the next token to graduate wins. 50% liquidity boost · 30% random buyers · 20% last buyer.',
+    cta: 'NEXT →',
+    skip: true,
+  },
+  {
+    title: 'Trench Guard',
+    sub: 'Free Chrome extension · Wallet protection',
+    body: 'Scam detection, unlimited approval warnings, and rug pull alerts. Pro tier adds 24/7 wallet monitoring, transaction simulation, and one-click revoke.',
+    cta: 'NEXT →',
+    skip: true,
+  },
+  {
+    title: 'Dig In.',
+    sub: 'Based Trenches is live on Base Chain.',
+    body: 'Launch a token, trade the trenches, or protect your wallet. Everything is on-chain, permissionless, and built for degens.',
+    cta: '⚔ ENTER THE TRENCHES',
+    skip: false,
+    isLast: true,
+  },
+]
 
 export default function IntroPage() {
-  const [current, setCurrent] = useState(0)
-  const [animating, setAnimating] = useState(false)
-  const router = useRouter()
+  const router  = useRouter()
+  const [slide, setSlide] = useState(0)
+  const [out,   setOut]   = useState(false)
 
-  const setCookie = () => {
- document.cookie = 'bt_intro_seen=1; path=/; max-age=31536000; SameSite=Lax'
-document.cookie = 'bt_intro_seen=1; path=/; max-age=31536000; domain=.basedtrenches.co; SameSite=Lax'
+  function markSeen() {
+    // Set on both cookie and localStorage so it works across both domains
+    document.cookie = 'bt_intro_seen=1; path=/; max-age=31536000; SameSite=Lax'
+    try { localStorage.setItem('bt_intro_seen', '1') } catch (_) {}
   }
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === ' ') goTo(current + 1)
-      if (e.key === 'ArrowLeft') goTo(current - 1)
-      if (e.key === 'Escape') skip()
+  function skip() { markSeen(); router.push('/') }
+
+  function next() {
+    if (slide >= SLIDES.length - 1) {
+      markSeen()
+      router.push('/trenches')
+      return
     }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [current])
-
-  const goTo = (n: number) => {
-    if (n < 0 || n >= 6 || animating) return
-    setAnimating(true)
-    setTimeout(() => { setCurrent(n); setAnimating(false) }, 300)
+    setOut(true)
+    setTimeout(() => { setSlide(s => s + 1); setOut(false) }, 200)
   }
 
-  const skip = () => { setCookie(); router.push('/') }
-  const enter = () => { setCookie(); router.push('/') }
-  const launch = () => { setCookie(); router.push('/launch') }
+  function launch() { markSeen(); router.push('/launch') }
 
-  const fade = {
-    opacity: animating ? 0 : 1,
-    transform: animating ? 'translateY(16px)' : 'translateY(0)',
-    transition: 'opacity 0.3s ease, transform 0.3s ease',
-    display: 'flex' as const,
-    flexDirection: 'column' as const,
-    alignItems: 'center' as const,
-    textAlign: 'center' as const,
-    maxWidth: '800px',
-    width: '100%',
-  }
-
-  const panel = { background: '#110f0b', padding: '1.25rem 1rem', textAlign: 'center' as const }
-  const mono = { fontFamily: 'Share Tech Mono, monospace' }
-  const ops = { fontFamily: 'Black Ops One, cursive' }
-  const osw = { fontFamily: 'Oswald, sans-serif' }
-  const bar = { fontFamily: 'Barlow Condensed, sans-serif' }
+  const s = SLIDES[slide]
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: '#060504', color: '#e8e0c8', fontFamily: 'Barlow Condensed, sans-serif', cursor: 'crosshair', overflow: 'hidden', zIndex: 200 }}>
-
-      {/* BG */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 100% 100% at 50% 0%,#0a0806 0%,#060504 100%)', zIndex: 0 }} />
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(184,112,64,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(184,112,64,0.07) 1px,transparent 1px)', backgroundSize: '48px 48px', WebkitMaskImage: 'linear-gradient(to bottom,rgba(0,0,0,0.5) 0%,transparent 80%)', maskImage: 'linear-gradient(to bottom,rgba(0,0,0,0.5) 0%,transparent 80%)', zIndex: 0 }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center,transparent 20%,rgba(0,0,0,0.75) 100%)', zIndex: 0 }} />
+    <div style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      background: 'var(--bg)', padding: '2rem', position: 'relative', overflow: 'hidden',
+    }}>
+      {/* Background texture */}
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(184,112,64,0.04) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(240,176,32,0.03) 0%, transparent 50%)', pointerEvents: 'none' }} />
 
       {/* Skip */}
-      {current < 5 && (
-        <button onClick={skip} style={{ position: 'absolute', top: '1.5rem', right: '2rem', zIndex: 50, ...mono, fontSize: '11px', color: '#8a8070', background: 'transparent', border: 'none', cursor: 'crosshair', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Skip Intro →
+      {s.skip && (
+        <button onClick={skip} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--grey-l)', background: 'transparent', border: 'none', cursor: 'pointer', letterSpacing: '0.1em' }}>
+          SKIP INTRO →
         </button>
       )}
 
-      {/* SLIDE AREA */}
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-
-        {/* SLIDE 1 — TOSHI HERO */}
-        {current === 0 && (
-          <div style={{ opacity: animating ? 0 : 1, transform: animating ? 'translateY(16px)' : 'translateY(0)', transition: 'opacity 0.3s ease, transform 0.3s ease', display: 'grid', gridTemplateColumns: '1fr 1fr', maxWidth: '1100px', width: '100%', height: '85vh', alignItems: 'center', gap: '3rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div style={{ ...mono, fontSize: '12px', color: '#b87040', letterSpacing: '0.2em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ width: '32px', height: '1px', background: '#b87040', display: 'inline-block' }} />
-                On Base · Dig In
-              </div>
-              <h1 style={{ ...ops, fontSize: 'clamp(40px,6vw,72px)', lineHeight: 0.92, letterSpacing: '0.02em', margin: 0 }}>
-                BASED<br />
-                <span style={{ background: 'linear-gradient(135deg,#b87040,#f0b020)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>TRENCHES</span>
-              </h1>
-              <p style={{ ...bar, fontSize: '18px', color: '#8a8070', lineHeight: 1.5, maxWidth: '460px', margin: 0 }}>
-                A <strong style={{ color: '#d4956a' }}>memecoin launchpad</strong> on Base Chain. Tokens bond to 3 ETH, graduate to Uniswap V3, and feed a global jackpot. Every holder has skin in the game.
-              </p>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.5rem' }}>
-                <button onClick={() => goTo(1)} style={{ ...osw, fontWeight: 700, fontSize: '15px', color: '#060504', background: 'linear-gradient(135deg,#b87040,#d4956a)', border: 'none', padding: '0.8rem 2rem', letterSpacing: '0.1em', cursor: 'crosshair', clipPath: 'polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)', textTransform: 'uppercase' }}>
-                  Show Me How →
-                </button>
-                <button onClick={skip} style={{ ...osw, fontWeight: 600, fontSize: '14px', color: '#8a8070', background: 'transparent', border: 'none', cursor: 'crosshair', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Skip
-                </button>
-              </div>
-            </div>
-            <div style={{ position: 'relative', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-              <Image
-                src="/toshi.png"
-                alt="Toshi"
-                width={700}
-                height={308}
-                style={{ width: '100%', height: 'auto', maxHeight: '70vh', objectFit: 'contain', objectPosition: 'right center', filter: 'drop-shadow(-20px 0 60px rgba(184,112,64,0.15))', animation: 'float 6s ease-in-out infinite' }}
-                priority
-              />
-            </div>
-          </div>
-        )}
-
-        {/* SLIDE 2 — BONDING CURVE */}
-        {current === 1 && (
-          <div style={fade}>
-            <div style={{ ...mono, fontSize: '11px', color: '#5a5040', letterSpacing: '0.2em', marginBottom: '2rem' }}>02 / 06</div>
-            <div style={{ fontSize: '48px', marginBottom: '1rem' }}>📈</div>
-            <h2 style={{ ...ops, fontSize: 'clamp(28px,5vw,52px)', color: '#e8e0c8', letterSpacing: '0.03em', marginBottom: '1rem', lineHeight: 1 }}>
-              Launch on the <span style={{ color: '#d4956a' }}>Bonding Curve</span>
-            </h2>
-            <p style={{ ...bar, fontSize: '18px', color: '#8a8070', lineHeight: 1.6, maxWidth: '600px', marginBottom: '2rem' }}>
-              Every token starts at ~<strong style={{ color: '#e8e0c8' }}>$3,000 market cap</strong>. Pay <strong style={{ color: '#e8e0c8' }}>0.002 ETH</strong> to deploy. The bonding curve runs until <strong style={{ color: '#e8e0c8' }}>3 ETH</strong> is reached — early buyers get the best price.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1px', background: 'rgba(184,112,64,0.18)', border: '1px solid rgba(184,112,64,0.18)', width: '100%', maxWidth: '600px', marginBottom: '2rem' }}>
-              {[['0.002 ETH','Launch Fee'],['3 ETH','Graduation Target'],['1B','Token Supply']].map(([v,l]) => (
-                <div key={l} style={panel}>
-                  <div style={{ ...ops, fontSize: '22px', color: '#d4956a' }}>{v}</div>
-                  <div style={{ ...mono, fontSize: '9px', color: '#8a8070', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '4px' }}>{l}</div>
-                </div>
-              ))}
-            </div>
-            <p style={{ ...bar, fontSize: '15px', color: '#8a8070', lineHeight: 1.6, maxWidth: '560px' }}>
-              At graduation: Uniswap V3 pool created automatically. Creator earns <strong style={{ color: '#3a9948' }}>0.25 ETH</strong>. Platform gets <strong style={{ color: '#b87040' }}>0.25 ETH</strong>. LP owned by protocol vault forever.
-            </p>
-          </div>
-        )}
-
-        {/* SLIDE 3 — WAR CHEST */}
-        {current === 2 && (
-          <div style={fade}>
-            <div style={{ ...mono, fontSize: '11px', color: '#5a5040', letterSpacing: '0.2em', marginBottom: '2rem' }}>03 / 06</div>
-            <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⚡</div>
-            <h2 style={{ ...ops, fontSize: 'clamp(28px,5vw,52px)', letterSpacing: '0.03em', marginBottom: '1rem', lineHeight: 1, background: 'linear-gradient(135deg,#c8900a,#f0b020)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              The War Chest
-            </h2>
-            <p style={{ ...bar, fontSize: '18px', color: '#8a8070', lineHeight: 1.6, maxWidth: '600px', marginBottom: '2rem' }}>
-              Every graduated token feeds a <strong style={{ color: '#e8e0c8' }}>global jackpot</strong>. Activates at <strong style={{ color: '#e8e0c8' }}>1 ETH</strong>. The next token to break out wins up to <strong style={{ color: '#f0b020' }}>2 ETH</strong>.
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
-              {[['40%','Liquidity Boost'],['20%','Top 10 Holders'],['10%','Last Buyer'],['5%','Stakers'],['5%','Armory'],['20%','Platform']].map(([pct,label]) => (
-                <div key={label} style={{ ...mono, fontSize: '11px', padding: '6px 14px', border: '1px solid rgba(200,144,10,0.25)', background: 'rgba(200,144,10,0.06)', color: '#c8900a' }}>
-                  <strong style={{ color: '#f0b020' }}>{pct}</strong> {label}
-                </div>
-              ))}
-            </div>
-            <p style={{ ...bar, fontSize: '15px', color: '#8a8070', lineHeight: 1.6, maxWidth: '560px' }}>
-              Be the <strong style={{ color: '#e8e0c8' }}>last buyer</strong> before graduation → 10%. Be a <strong style={{ color: '#e8e0c8' }}>top 10 holder</strong> → share 20%. Chest resets and charges again after each payout.
-            </p>
-          </div>
-        )}
-
-        {/* SLIDE 4 — RAIDS */}
-        {current === 3 && (
-          <div style={fade}>
-            <div style={{ ...mono, fontSize: '11px', color: '#5a5040', letterSpacing: '0.2em', marginBottom: '2rem' }}>04 / 06</div>
-            <div style={{ fontSize: '48px', marginBottom: '1rem' }}>⚔</div>
-            <h2 style={{ ...ops, fontSize: 'clamp(28px,5vw,52px)', color: '#e8e0c8', letterSpacing: '0.03em', marginBottom: '1rem', lineHeight: 1 }}>
-              What is a <span style={{ color: '#ff3311' }}>Raid</span>?
-            </h2>
-            <p style={{ ...bar, fontSize: '18px', color: '#8a8070', lineHeight: 1.6, maxWidth: '600px', marginBottom: '2rem' }}>
-              When a token gets rapid buys — <strong style={{ color: '#e8e0c8' }}>5 buys in 90 seconds</strong> or a <strong style={{ color: '#e8e0c8' }}>0.5 ETH surge</strong> — a Raid triggers. Pure momentum signal. Get in before it graduates.
-            </p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
-              <div style={{ ...osw, fontWeight: 700, fontSize: '11px', padding: '5px 14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#b87040', border: '1px solid rgba(184,112,64,0.4)', background: 'rgba(184,112,64,0.08)' }}>⚡ Raid Started</div>
-              <div style={{ ...osw, fontWeight: 700, fontSize: '11px', padding: '5px 14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#ff3311', border: '1px solid rgba(204,34,0,0.4)', background: 'rgba(204,34,0,0.08)' }}>⚔ Raid Active</div>
-              <div style={{ ...osw, fontWeight: 700, fontSize: '11px', padding: '5px 14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#3a9948', border: '1px solid rgba(58,153,72,0.4)', background: 'rgba(58,153,72,0.08)' }}>✓ Raid Successful</div>
-              <div style={{ ...osw, fontWeight: 700, fontSize: '11px', padding: '5px 14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8a8070', border: '1px solid rgba(90,80,64,0.4)' }}>✕ Raid Failed</div>
-            </div>
-            <p style={{ ...bar, fontSize: '15px', color: '#8a8070', lineHeight: 1.6, maxWidth: '560px' }}>
-              Watch the <strong style={{ color: '#e8e0c8' }}>Combat Log</strong> and <strong style={{ color: '#e8e0c8' }}>War Room</strong> for live Raids. When you see ⚔ on a token card — that is your signal to move.
-            </p>
-          </div>
-        )}
-
-        {/* SLIDE 5 — FORTIFY & ARMORY */}
-        {current === 4 && (
-          <div style={fade}>
-            <div style={{ ...mono, fontSize: '11px', color: '#5a5040', letterSpacing: '0.2em', marginBottom: '2rem' }}>05 / 06</div>
-            <div style={{ fontSize: '48px', marginBottom: '1rem' }}>🏰</div>
-            <h2 style={{ ...ops, fontSize: 'clamp(28px,5vw,52px)', color: '#e8e0c8', letterSpacing: '0.03em', marginBottom: '1rem', lineHeight: 1 }}>
-              <span style={{ color: '#d4956a' }}>Fortify</span> &amp; <span style={{ background: 'linear-gradient(135deg,#c8900a,#f0b020)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Armory</span>
-            </h2>
-            <p style={{ ...bar, fontSize: '18px', color: '#8a8070', lineHeight: 1.6, maxWidth: '600px', marginBottom: '2rem' }}>
-              Every graduated token has its own <strong style={{ color: '#e8e0c8' }}>staking pool</strong> (Fortify) earning real ETH from Uniswap fees, and a <strong style={{ color: '#e8e0c8' }}>reserve treasury</strong> (Armory) funded by sell fees.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1px', background: 'rgba(184,112,64,0.18)', border: '1px solid rgba(184,112,64,0.18)', maxWidth: '560px', width: '100%', marginBottom: '2rem' }}>
-              {[['30d','1x'],['60d','1.5x'],['90d','2x'],['180d','3x']].map(([d,m]) => (
-                <div key={d} style={panel}>
-                  <div style={{ ...ops, fontSize: '16px', color: '#d4956a' }}>{d}</div>
-                  <div style={{ ...mono, fontSize: '13px', color: '#3a9948', marginTop: '4px' }}>{m}</div>
-                  <div style={{ ...mono, fontSize: '9px', color: '#5a5040', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>multiplier</div>
-                </div>
-              ))}
-            </div>
-            <p style={{ ...bar, fontSize: '15px', color: '#8a8070', lineHeight: 1.6, maxWidth: '560px' }}>
-              Stake longer, earn more. Unstake early = <strong style={{ color: '#e8e0c8' }}>10% penalty</strong> back to stakers + forfeit rewards. Armory votes monthly: <strong style={{ color: '#e8e0c8' }}>buyback + burn</strong> or <strong style={{ color: '#e8e0c8' }}>add liquidity</strong>.
-            </p>
-          </div>
-        )}
-
-        {/* SLIDE 6 — ENTER */}
-        {current === 5 && (
-          <div style={fade}>
-            <div style={{ ...mono, fontSize: '11px', color: '#5a5040', letterSpacing: '0.2em', marginBottom: '2rem' }}>06 / 06</div>
-            <div style={{ fontSize: '56px', marginBottom: '1rem' }}>🪖</div>
-            <h2 style={{ ...ops, fontSize: 'clamp(36px,6vw,72px)', color: '#e8e0c8', letterSpacing: '0.02em', lineHeight: 0.92, marginBottom: '1rem' }}>
-              READY TO<br />
-              <span style={{ background: 'linear-gradient(135deg,#b87040,#f0b020)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>DIG IN?</span>
-            </h2>
-            <p style={{ ...osw, fontSize: '16px', color: '#8a8070', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '3rem' }}>
-              On Base · The Trenches Await
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
-              <button onClick={enter} style={{ ...osw, fontWeight: 700, fontSize: '17px', color: '#060504', background: 'linear-gradient(135deg,#b87040,#d4956a)', border: 'none', padding: '1rem 2.5rem', letterSpacing: '0.12em', cursor: 'crosshair', clipPath: 'polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)', textTransform: 'uppercase' }}>
-                ⚔ Enter The Trenches
-              </button>
-              <button onClick={launch} style={{ ...osw, fontWeight: 600, fontSize: '17px', color: '#b87040', background: 'transparent', border: '1px solid rgba(184,112,64,0.4)', padding: '1rem 2.5rem', letterSpacing: '0.12em', cursor: 'crosshair', clipPath: 'polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%)', textTransform: 'uppercase' }}>
-                Launch A Token
-              </button>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ff3311', boxShadow: '0 0 6px #ff3311', animation: 'blink 0.9s ease-in-out infinite' }} />
-              <span style={{ ...mono, fontSize: '11px', color: '#8a8070', letterSpacing: '0.1em' }}>LIVE ON BASE CHAIN</span>
-            </div>
-          </div>
-        )}
-
-      </div>
-
-      {/* DOTS */}
-      <div style={{ position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.6rem', alignItems: 'center', zIndex: 50 }}>
-        {[0,1,2,3,4,5].map(i => (
-          <div key={i} onClick={() => goTo(i)} style={{ width: i === current ? '24px' : '8px', height: '8px', borderRadius: i === current ? '4px' : '50%', background: i === current ? '#b87040' : 'rgba(184,112,64,0.25)', border: '1px solid rgba(184,112,64,0.3)', cursor: 'crosshair', transition: 'all 0.3s', boxShadow: i === current ? '0 0 8px rgba(184,112,64,0.6)' : 'none' }} />
+      {/* Slide dots */}
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '3rem' }}>
+        {SLIDES.map((_, i) => (
+          <div key={i} style={{ width: i === slide ? '24px' : '6px', height: '6px', borderRadius: '3px', background: i === slide ? 'var(--copper)' : 'var(--grey)', transition: 'all 0.3s' }} />
         ))}
       </div>
 
-      {/* PREV / NEXT */}
-      {current > 0 && (
-        <button onClick={() => goTo(current - 1)} style={{ position: 'absolute', bottom: '2rem', left: '2rem', ...osw, fontWeight: 700, fontSize: '12px', color: '#8a8070', background: 'rgba(184,112,64,0.06)', border: '1px solid rgba(184,112,64,0.18)', padding: '0.6rem 1rem', cursor: 'crosshair', letterSpacing: '0.1em', textTransform: 'uppercase', zIndex: 50 }}>
-          ← Prev
-        </button>
-      )}
-      {current < 5 && (
-        <button onClick={() => goTo(current + 1)} style={{ position: 'absolute', bottom: '2rem', right: '2rem', ...osw, fontWeight: 700, fontSize: '12px', color: '#8a8070', background: 'rgba(184,112,64,0.06)', border: '1px solid rgba(184,112,64,0.18)', padding: '0.6rem 1rem', cursor: 'crosshair', letterSpacing: '0.1em', textTransform: 'uppercase', zIndex: 50 }}>
-          Next →
-        </button>
-      )}
+      {/* Content */}
+      <div style={{ maxWidth: '680px', width: '100%', textAlign: 'center', opacity: out ? 0 : 1, transform: out ? 'translateY(10px)' : 'translateY(0)', transition: 'all 0.2s' }}>
+        {slide === 0 && (
+          <Image src="/banner.png" alt="Based Trenches" width={500} height={219}
+            style={{ maxWidth: 'min(500px,90vw)', width: '100%', height: 'auto', marginBottom: '2rem', filter: 'drop-shadow(0 0 20px rgba(184,112,64,0.3))' }} priority />
+        )}
 
-      <style>{`
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-      `}</style>
+        {slide > 0 && (
+          <div style={{ fontSize: '48px', marginBottom: '1rem' }}>
+            {['','🪖','📈','⚡','🛡','⚔'][slide]}
+          </div>
+        )}
+
+        <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: 'clamp(24px,5vw,42px)', color: 'var(--cream)', marginBottom: '0.5rem', letterSpacing: '0.02em' }}>{s.title}</div>
+        <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '14px', color: 'var(--copper)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>{s.sub}</div>
+        <p style={{ fontFamily: 'Oswald, sans-serif', fontSize: '16px', color: 'var(--grey-l)', lineHeight: 1.8, marginBottom: '3rem', maxWidth: '520px', margin: '0 auto 3rem' }}>{s.body}</p>
+
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button onClick={next} style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '15px', color: '#060504', background: 'linear-gradient(135deg,var(--copper),var(--copper-l))', border: 'none', padding: '0.85rem 2.5rem', cursor: 'pointer', letterSpacing: '0.12em', textTransform: 'uppercase', clipPath: 'polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%)' }}>
+            {s.cta}
+          </button>
+          {(s as any).isLast && (
+            <button onClick={launch} style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--copper)', background: 'transparent', border: '1px solid rgba(184,112,64,0.4)', padding: '0.85rem 2.5rem', cursor: 'pointer', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              LAUNCH A TOKEN
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* NEXT text */}
+      {slide < SLIDES.length - 1 && (
+        <div style={{ position: 'absolute', bottom: '2rem', fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--grey)', letterSpacing: '0.12em' }}>
+          {slide + 1} / {SLIDES.length}
+        </div>
+      )}
     </div>
   )
 }

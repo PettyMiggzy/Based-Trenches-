@@ -29,16 +29,14 @@ function HeroStats() {
     return () => clearInterval(i)
   }, [])
 
-  const stats = [
-    { v: total !== null ? `${total}` : '—', l: 'Tokens Launched' },
-    { v: '—',                                l: 'Total Volume'    },
-    { v: grads !== null ? `${grads}` : '—', l: 'Broke Out'       },
-    { v: '—',                                l: 'War Chest'       },
-  ]
-
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1px', background: 'var(--border)', border: '1px solid var(--border)', maxWidth: '720px', width: '100%' }}>
-      {stats.map(s => (
+      {[
+        { v: total !== null ? `${total}` : '—', l: 'Tokens Launched' },
+        { v: '—',                                l: 'Total Volume'    },
+        { v: grads !== null ? `${grads}` : '—', l: 'Broke Out'       },
+        { v: '—',                                l: 'War Chest'       },
+      ].map(s => (
         <div key={s.l} style={{ background: 'var(--panel)', padding: '1.25rem 1.5rem', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '24px', color: 'var(--copper-l)' }}>{s.v}</div>
           <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--grey-l)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '4px' }}>{s.l}</div>
@@ -52,15 +50,18 @@ export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Check cookie — works on BOTH basedtrenches.fun and basedtrenches.co
-    const seen = document.cookie.split(';').some(c => c.trim().startsWith('bt_intro_seen='))
-    if (!seen) router.push('/intro')
+    // Check BOTH cookie and localStorage — works across both domains
+    const cookieSeen = document.cookie.split(';').some(c => c.trim().startsWith('bt_intro_seen='))
+    let localSeen = false
+    try { localSeen = !!localStorage.getItem('bt_intro_seen') } catch (_) {}
+    if (!cookieSeen && !localSeen) router.push('/intro')
   }, [router])
 
   return (
     <>
       <section style={{ minHeight: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '4rem 2rem 6rem' }}>
-        <Image src="/banner.png" alt="Based Trenches" width={700} height={307} style={{ maxWidth: 'min(700px, 90vw)', width: '100%', height: 'auto', marginBottom: '0.75rem', filter: 'drop-shadow(0 0 30px rgba(184,112,64,0.3))' }} priority />
+        <Image src="/banner.png" alt="Based Trenches" width={700} height={307}
+          style={{ maxWidth: 'min(700px, 90vw)', width: '100%', height: 'auto', marginBottom: '0.75rem', filter: 'drop-shadow(0 0 30px rgba(184,112,64,0.3))' }} priority />
         <p style={{ fontFamily: 'Oswald, sans-serif', fontSize: '18px', fontWeight: 400, color: 'var(--grey-l)', letterSpacing: '0.3em', textTransform: 'uppercase', marginBottom: '2.5rem' }}>
           On <span style={{ color: 'var(--copper)' }}>Base</span>. Dig In.
         </p>
