@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Trench Guard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="popup.css"/>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="../icons/icon48.png" alt="TG" class="logo-img"/>
+      <div>
+        <div class="logo-title">TRENCH GUARD</div>
+        <div class="logo-sub">Wallet Protection · Base Chain</div>
+      </div>
+    </div>
+    <div id="guard-badge" class="badge safe">● SAFE</div>
+  </header>
+
+  <div id="sub-bar">
+    <span id="sub-status">Checking...</span>
+    <button id="btn-upgrade" style="display:none">⚡ UPGRADE</button>
+  </div>
+
+  <nav>
+    <button class="tab active" data-tab="status">🛡 STATUS</button>
+    <button class="tab" data-tab="scan">🔍 SCAN</button>
+    <button class="tab" data-tab="wallet">👛 WALLET</button>
+    <button class="tab" data-tab="pro">⚡ PRO</button>
+  </nav>
+
+  <!-- STATUS TAB -->
+  <div id="tab-status" class="tab-content active">
+    <div class="site-card">
+      <div class="site-label">CURRENT SITE</div>
+      <div id="site-url" class="site-url">—</div>
+      <div id="site-verdict" class="verdict safe">✓ No threats detected</div>
+    </div>
+
+    <div class="section-hdr">Protection Status</div>
+    <div class="check-list">
+      <div class="check-row"><span class="ck on">✓</span><span>Scam site detection</span><span class="badge-tier free">FREE</span></div>
+      <div class="check-row"><span class="ck on">✓</span><span>Phishing domain alerts</span><span class="badge-tier free">FREE</span></div>
+      <div class="check-row"><span class="ck on">✓</span><span>Unlimited approval warnings</span><span class="badge-tier free">FREE</span></div>
+      <div class="check-row"><span class="ck on">✓</span><span>Based Trenches verified badge</span><span class="badge-tier free">FREE</span></div>
+      <div class="check-row"><span class="ck" id="ck-honey">🔒</span><span>Honeypot detection</span><span class="badge-tier pro">PRO</span></div>
+      <div class="check-row"><span class="ck" id="ck-rug">🔒</span><span>Rug pull indicators</span><span class="badge-tier pro">PRO</span></div>
+      <div class="check-row"><span class="ck" id="ck-sim">🔒</span><span>Simulate before signing</span><span class="badge-tier pro">PRO</span></div>
+      <div class="check-row"><span class="ck" id="ck-watch">🔒</span><span>24/7 wallet monitoring</span><span class="badge-tier pro">PRO</span></div>
+      <div class="check-row"><span class="ck" id="ck-revoke">🔒</span><span>One-click revoke approvals</span><span class="badge-tier pro">PRO</span></div>
+    </div>
+
+    <div id="bt-verified" style="display:none" class="bt-card">
+      <span>🪖</span>
+      <div><div class="bt-title">Based Trenches — Verified</div><div class="bt-sub">Official site confirmed</div></div>
+      <a href="https://basedtrenches.fun" target="_blank">OPEN ↗</a>
+    </div>
+
+    <div class="section-hdr" style="margin-top:12px">Recent Alerts</div>
+    <div id="alert-list"><div class="empty">No alerts. Trench Guard is watching.</div></div>
+  </div>
+
+  <!-- SCAN TAB -->
+  <div id="tab-scan" class="tab-content">
+    <div class="section-hdr">Contract Scanner</div>
+    <p class="desc">Paste any contract or wallet address on Base to get a full safety analysis.</p>
+    <div class="field">
+      <label>ADDRESS ON BASE</label>
+      <input id="scan-input" type="text" placeholder="0x..."/>
+    </div>
+    <button class="btn-primary" id="btn-scan">🔍 SCAN CONTRACT</button>
+    <div id="scan-result"></div>
+
+    <div class="divider"></div>
+    <div class="section-hdr">Simulate Transaction <span class="pro-tag">PRO</span></div>
+    <p class="desc">See exactly what happens to your wallet before you sign anything.</p>
+    <div id="sim-locked" class="locked-msg">🔒 Upgrade to Pro to simulate transactions</div>
+    <div id="sim-form" style="display:none">
+      <div class="field">
+        <label>CONTRACT ADDRESS</label>
+        <input id="sim-contract" type="text" placeholder="0x..."/>
+      </div>
+      <div class="field">
+        <label>CALLDATA (hex)</label>
+        <input id="sim-data" type="text" placeholder="0x..."/>
+      </div>
+      <div class="field">
+        <label>VALUE (ETH)</label>
+        <input id="sim-value" type="text" placeholder="0.0"/>
+      </div>
+      <button class="btn-primary" id="btn-simulate">💸 SIMULATE</button>
+      <div id="sim-result"></div>
+    </div>
+  </div>
+
+  <!-- WALLET TAB -->
+  <div id="tab-wallet" class="tab-content">
+    <div class="section-hdr">Wallet Health <span class="pro-tag">PRO</span></div>
+    <p class="desc">Full exposure report — every contract with access to your funds.</p>
+
+    <div id="wallet-locked" class="locked-msg">🔒 Connect wallet and upgrade to Pro to scan</div>
+    <div id="wallet-connected" style="display:none">
+      <div class="wallet-info">
+        <span id="wallet-addr-display">—</span>
+        <button id="btn-scan-wallet" class="btn-sm">SCAN</button>
+      </div>
+      <div id="health-score-wrap" style="display:none">
+        <div class="score-box">
+          <div class="score-num" id="health-score">—</div>
+          <div class="score-label">HEALTH SCORE</div>
+        </div>
+      </div>
+      <div id="approval-list"></div>
+      <a href="https://basedtrenches.fun/guard" target="_blank" class="hub-link">🛡 Full report on Guard Hub ↗</a>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-hdr">24/7 Monitoring <span class="pro-tag">PRO</span></div>
+    <p class="desc">We watch your wallet around the clock and alert you to suspicious activity.</p>
+    <div id="monitor-locked" class="locked-msg">🔒 Upgrade to Pro to enable wallet monitoring</div>
+    <div id="monitor-active" style="display:none" class="monitor-box">
+      <div class="monitor-status">
+        <span class="dot-green"></span>
+        <span>Monitoring active</span>
+      </div>
+      <div class="monitor-note">Alerts for: large outflows · new approvals · suspicious contracts · rug indicators</div>
+      <div class="disclaimer">⚠ Monitoring is best-effort. Not a guarantee against loss. Always verify transactions manually.</div>
+    </div>
+  </div>
+
+  <!-- PRO TAB -->
+  <div id="tab-pro" class="tab-content">
+    <div class="pro-hero">
+      <div class="pro-title">⚡ Trench Guard Pro</div>
+      <div class="pro-price">0.005 ETH / month · ~$10 · Paid on Base</div>
+    </div>
+    <ul class="pro-list">
+      <li>🍯 Honeypot detection before you buy</li>
+      <li>🚨 Rug pull early warning indicators</li>
+      <li>💸 Simulate transaction before signing</li>
+      <li>🐋 24/7 wallet monitoring + instant alerts</li>
+      <li>📊 Full contract audit scores</li>
+      <li>🔓 One-click revoke token approvals</li>
+      <li>🏥 Wallet exposure health report</li>
+      <li>📈 Based Trenches token milestone alerts</li>
+    </ul>
+
+    <div class="settings-card">
+      <div class="settings-row"><span>Status</span><span id="pro-status">Free Trial</span></div>
+      <div class="settings-row"><span>Days remaining</span><span id="pro-days">—</span></div>
+      <div class="settings-row"><span>Wallet</span><span id="pro-wallet">Not connected</span></div>
+    </div>
+
+    <button class="btn-primary" id="btn-pay">PAY 0.005 ETH ON BASE</button>
+    <div class="pay-note">Verified on-chain · No signup · 31 days per payment</div>
+    <div class="disclaimer">⚠ Trench Guard is a helpful security tool — not a guarantee of safety. Always verify transactions manually. We are not liable for any losses.</div>
+
+    <div class="divider"></div>
+    <a href="https://basedtrenches.fun/guard" target="_blank" class="hub-link">🛡 Open Trench Guard Hub ↗</a>
+    <a href="https://basedtrenches.fun/guard#subscription" target="_blank" class="hub-link">💳 Manage Subscription ↗</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

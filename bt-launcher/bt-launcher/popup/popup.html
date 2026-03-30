@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Based Trenches Launcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Oswald:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span>🪖</span>
+      <div>
+        <div class="logo-title">BT LAUNCHER</div>
+        <div class="logo-sub">Based Trenches · Base Chain</div>
+      </div>
+    </div>
+    <a href="https://basedtrenches.fun" target="_blank" class="site-link">basedtrenches.fun ↗</a>
+  </header>
+
+  <div id="wallet-bar">
+    <span id="wallet-status"><span class="no-wallet">No wallet connected</span></span>
+    <button id="btn-connect" class="btn-connect">CONNECT</button>
+  </div>
+
+  <!-- FORM SCREEN -->
+  <div id="screen-form" class="screen active">
+    <div class="steps">
+      <div class="step active" id="s1"></div>
+      <div class="step" id="s2"></div>
+      <div class="step" id="s3"></div>
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-label">TOKEN PREVIEW</div>
+      <div class="preview-row">
+        <div class="preview-img" id="preview-img"><span>🪖</span></div>
+        <div>
+          <div class="preview-symbol" id="preview-symbol">$TICKER</div>
+          <div class="preview-name" id="preview-name">Token Name</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>TOKEN IMAGE</label>
+      <div class="upload-zone" id="img-zone">
+        <input type="file" id="img-input" accept="image/*" />
+        <div id="img-ph"><div class="up-icon">🖼</div><div class="up-text">Drop image or click to upload</div><div class="up-sub">PNG · JPG · GIF · Max 5MB</div></div>
+        <img id="img-preview" style="display:none;width:100%;height:80px;object-fit:cover" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>BANNER <span class="opt">(optional)</span></label>
+      <div class="upload-zone" id="banner-zone">
+        <input type="file" id="banner-input" accept="image/*" />
+        <div id="banner-ph"><div class="up-icon">🏴</div><div class="up-text">Drop banner or click to upload</div><div class="up-sub">Recommended 1200×400 · Max 5MB</div></div>
+        <img id="banner-preview" style="display:none;width:100%;height:60px;object-fit:cover" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>TOKEN NAME *</label>
+        <input type="text" id="token-name" placeholder="War Zone" maxlength="32" />
+      </div>
+      <div class="field">
+        <label>SYMBOL *</label>
+        <input type="text" id="token-symbol" placeholder="WARZ" maxlength="10" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>DESCRIPTION</label>
+      <textarea id="token-desc" placeholder="Tell the trenches what this is about..." rows="2" maxlength="280"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>TWITTER / X</label>
+        <input type="text" id="token-twitter" placeholder="@handle" />
+      </div>
+      <div class="field">
+        <label>TELEGRAM</label>
+        <input type="text" id="token-telegram" placeholder="t.me/..." />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>WEBSITE</label>
+      <input type="text" id="token-website" placeholder="https://" />
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="fee-bar">
+      <div><div class="fee-label">Launch Fee</div><div class="fee-sub">One-time · Base Chain</div></div>
+      <div style="text-align:right"><div class="fee-val">0.002 ETH</div><div class="fee-sub">≈ $4.20</div></div>
+    </div>
+
+    <div id="launch-status" style="display:none" class="status"></div>
+    <button class="btn-primary" id="btn-launch">⚔ DEPLOY TOKEN</button>
+    <button class="btn-secondary" id="btn-view-trenches">VIEW LIVE TRENCHES →</button>
+  </div>
+
+  <!-- DEPLOYING SCREEN -->
+  <div id="screen-deploying" class="screen">
+    <div class="center-screen">
+      <div style="font-size:48px;margin-bottom:16px">⚙️</div>
+      <div class="big-title">DEPLOYING...</div>
+      <div class="sub-text">Confirm in your wallet.<br/>Do not close this window.</div>
+      <div id="deploy-status" class="status loading">Waiting for wallet confirmation...</div>
+    </div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div id="screen-success" class="screen">
+    <div class="center-screen">
+      <div style="font-size:52px;margin-bottom:12px">🎖</div>
+      <div class="big-title" style="color:var(--gold)">TOKEN DEPLOYED!</div>
+      <div class="sub-text" id="success-msg">Your token is live on Base and will appear on basedtrenches.fun within 30 seconds.</div>
+      <a id="tx-link" class="mono-link" href="#" target="_blank">View on Basescan ↗</a>
+      <a id="token-link" class="mono-link" href="#" target="_blank">View token page ↗</a>
+      <button class="btn-primary" id="btn-another">⚔ LAUNCH ANOTHER</button>
+      <button class="btn-secondary" id="btn-open-site">OPEN BASEDTRENCHES.FUN →</button>
+    </div>
+  </div>
+
+  <!-- TRENCHES SCREEN -->
+  <div id="screen-trenches" class="screen">
+    <div class="section-hdr">Live Trenches</div>
+    <div id="tokens-list"><div class="loading-msg">Loading tokens...</div></div>
+    <button class="btn-secondary" id="btn-all-tokens" style="margin-top:12px">VIEW ALL ON SITE →</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
