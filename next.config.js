@@ -1,6 +1,11 @@
 ﻿/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: { domains: [] },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

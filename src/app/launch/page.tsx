@@ -1,7 +1,8 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { useRouter } from 'next/navigation'
 import { parseEther } from 'viem'
 import { GRAD_FLOW } from '../../lib/types'
 
@@ -39,59 +40,55 @@ const FACTORY_ABI = [
 export default function LaunchPage() {
   const { isConnected } = useAccount()
   const { openConnectModal } = useConnectModal()
+  const router = useRouter()
 
-  const [name,        setName]        = useState('')
-  const [symbol,      setSymbol]      = useState('')
-  const [description, setDescription] = useState('')
-  const [imageUri,    setImageUri]    = useState('')
-  const [imagePreview,setImagePreview]= useState('')
-  const [twitter,     setTwitter]     = useState('')
-  const [telegram,    setTelegram]    = useState('')
-  const [website,     setWebsite]     = useState('')
-  const [uploading,   setUploading]   = useState(false)
-  const [dragOver,    setDragOver]    = useState(false)
-  const [error,       setError]       = useState('')
+  const [name,         setName]         = useState('')
+  const [symbol,       setSymbol]       = useState('')
+  const [description,  setDescription]  = useState('')
+  const [imageUri,     setImageUri]     = useState('')
+  const [imagePreview, setImagePreview] = useState('')
+  const [twitter,      setTwitter]      = useState('')
+  const [telegram,     setTelegram]     = useState('')
+  const [website,      setWebsite]      = useState('')
+  const [uploading,    setUploading]    = useState(false)
+  const [dragOver,     setDragOver]     = useState(false)
+  const [error,        setError]        = useState('')
+  const [txHash,       setTxHash]       = useState<`0x${string}` | undefined>()
 
-  const { writeContract, data: txHash, isPending } = useWriteContract()
+  const { writeContractAsync } = useWriteContract()
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash })
 
-  // Upload image to imgbb (free image hosting — no API key needed for small images)
-  // Alternatively uploads to a base64 data URI if small enough
+  useEffect(() => {
+    if (isSuccess && txHash) {
+      router.push(`/?launched=true`)
+    }
+  }, [isSuccess, txHash])
+
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX = 400
+        let w = img.width, h = img.height
+        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX }
+        canvas.width = w; canvas.height = h
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
+        resolve(canvas.toDataURL('image/jpeg', 0.6))
+      }
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   const handleImage = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) { setError('Please upload an image file'); return }
-    if (file.size > 5 * 1024 * 1024) { setError('Image must be under 5MB'); return }
     setError('')
     setUploading(true)
     try {
-      // Convert to base64 for preview
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result as string
-        setImagePreview(result)
-      }
-      reader.readAsDataURL(file)
-
-      // Upload to imgbb
-      const formData = new FormData()
-      formData.append('image', file)
-      const res = await fetch('https://api.imgbb.com/1/upload?key=YOUR_KEY', {
-        method: 'POST',
-        body: formData,
-      }).catch(() => null)
-
-      if (res?.ok) {
-        const data = await res.json()
-        setImageUri(data.data.url)
-      } else {
-        // Fall back to base64 data URI if imgbb fails
-        const reader2 = new FileReader()
-        reader2.onload = (e) => {
-          const result = e.target?.result as string
-          setImageUri(result)
-        }
-        reader2.readAsDataURL(file)
-      }
-    } catch (e) {
+      const compressed = await compressImage(file)
+      setImagePreview(compressed)
+      setImageUri(compressed)
+    } catch {
       setError('Image upload failed')
     } finally {
       setUploading(false)
@@ -116,23 +113,29 @@ export default function LaunchPage() {
     if (!symbol.trim()) { setError('Ticker symbol is required'); return }
     setError('')
 
-    writeContract({
-      address: FACTORY_ADDRESS,
-      abi: FACTORY_ABI,
-      functionName: 'launchToken',
-      value: parseEther('0.002'),
-      args: [{
-        name:        name.trim(),
-        symbol:      symbol.trim().toUpperCase(),
-        imageUri:    imageUri,
-        description: description.trim(),
-        website:     website.trim(),
-        twitter:     twitter.trim(),
-        telegram:    telegram.trim(),
-      }],
-    })
+    try {
+      const hash = await writeContractAsync({
+        address: FACTORY_ADDRESS,
+        abi: FACTORY_ABI,
+        functionName: 'launchToken',
+        value: parseEther('0.002'),
+        args: [{
+          name:        name.trim(),
+          symbol:      symbol.trim().toUpperCase(),
+          imageUri:    imageUri,
+          description: description.trim(),
+          website:     website.trim(),
+          twitter:     twitter.trim(),
+          telegram:    telegram.trim(),
+        }],
+      })
+      setTxHash(hash)
+    } catch (e: any) {
+      setError(e?.shortMessage || e?.message || 'Transaction failed')
+    }
   }
 
+  const isPending = false
   const loading = isPending || isConfirming || uploading
 
   return (
@@ -258,13 +261,16 @@ export default function LaunchPage() {
               disabled={loading}
               className="btn-clip"
               style={{ width: '100%', padding: '1rem', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: '16px', color: '#fff', background: loading ? 'rgba(255,51,17,0.4)' : 'linear-gradient(135deg,var(--red),var(--red-b))', border: 'none', letterSpacing: '0.15em', cursor: loading ? 'not-allowed' : 'crosshair', textTransform: 'uppercase' }}>
-              {!isConnected ? '⚔ CONNECT WALLET TO DEPLOY' : isPending ? '⏳ CONFIRM IN WALLET...' : isConfirming ? '⏳ DEPLOYING ON CHAIN...' : '⚔ DEPLOY TOKEN'}
+              {!isConnected
+                ? '⚔ CONNECT WALLET TO DEPLOY'
+                : isConfirming
+                ? '⏳ DEPLOYING ON CHAIN...'
+                : '⚔ DEPLOY TOKEN'}
             </button>
           </div>
 
           {/* Right: Preview */}
           <div style={{ position: 'sticky', top: '80px' }}>
-            {/* Token Preview */}
             <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', padding: '1.25rem', marginBottom: '1rem' }}>
               <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--copper)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '1rem' }}>Token Preview</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -286,7 +292,6 @@ export default function LaunchPage() {
               </div>
             </div>
 
-            {/* Bonding Curve */}
             <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', padding: '1.25rem', marginBottom: '1rem' }}>
               <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--copper)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Bonding Curve</div>
               <svg viewBox="0 0 240 100" style={{ width: '100%', height: '80px' }}>
@@ -298,7 +303,6 @@ export default function LaunchPage() {
               </svg>
             </div>
 
-            {/* Fee Flow */}
             <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', padding: '1.25rem' }}>
               <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', fontWeight: 700, color: 'var(--copper)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Fee Flow at Graduation</div>
               {[
