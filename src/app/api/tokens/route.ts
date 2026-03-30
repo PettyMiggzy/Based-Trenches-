@@ -11,52 +11,59 @@ const FACTORY_ABI = [
 ] as const
 
 const TOKEN_ABI = [
-  { name: 'name',   type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  { name: 'symbol', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  // setMeta stores: img, desc, web, tw, tg — readable via public vars
-  { name: 'img',    type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  { name: 'desc',   type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  { name: 'web',    type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  { name: 'tw',     type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
-  { name: 'tg',     type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
+  { name: 'name',    type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
+  { name: 'symbol',  type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
+  { name: 'img',     type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
+  { name: 'desc',    type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
+  { name: 'web',     type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
+  { name: 'tw',      type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
+  { name: 'tg',      type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'string' }] },
   { name: 'creator', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] },
 ] as const
 
 const CURVE_ABI = [
-  { name: 'totalRaised',  type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'TARGET',       type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
-  { name: 'graduated',    type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'bool'    }] },
-  { name: 'lpAddress',    type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] },
+  { name: 'totalRaised', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+  { name: 'TARGET',      type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+  { name: 'graduated',   type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'bool'    }] },
+  { name: 'lpAddress',   type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address' }] },
 ] as const
 
 const ARMORY_ABI = [
   { name: 'balance', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
 ] as const
 
-let cache: { data: unknown; ts: number } | null = null
-const CACHE_TTL = 30000
-
 export async function GET() {
   try {
-    if (cache && Date.now() - cache.ts < CACHE_TTL) {
-      return NextResponse.json(cache.data, { headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' } })
-    }
+    const addresses = await client.readContract({
+      address: FACTORY,
+      abi: FACTORY_ABI,
+      functionName: 'getAllTokens'
+    }) as `0x${string}`[]
 
-    const addresses = await client.readContract({ address: FACTORY, abi: FACTORY_ABI, functionName: 'getAllTokens' }) as `0x${string}`[]
-    if (!addresses || addresses.length === 0) return NextResponse.json({ tokens: [], total: 0 })
+    if (!addresses || addresses.length === 0) {
+      return NextResponse.json({ tokens: [], total: 0 })
+    }
 
     const slice = [...addresses].reverse().slice(0, 50)
 
     const tokens = await Promise.all(slice.map(async (addr) => {
       try {
-        const [curve, armory] = await client.readContract({ address: FACTORY, abi: FACTORY_ABI, functionName: 'getTokenData', args: [addr] }) as [`0x${string}`, `0x${string}`, `0x${string}`, boolean]
+        const data = await client.readContract({
+          address: FACTORY,
+          abi: FACTORY_ABI,
+          functionName: 'getTokenData',
+          args: [addr]
+        })
+
+        console.log('getTokenData for', addr, ':', data)
+
+        const [curve, armory] = data as [`0x${string}`, `0x${string}`, `0x${string}`, boolean]
 
         const [name, symbol] = await Promise.all([
           client.readContract({ address: addr, abi: TOKEN_ABI, functionName: 'name' }),
           client.readContract({ address: addr, abi: TOKEN_ABI, functionName: 'symbol' }),
         ]) as [string, string]
 
-        // Try to get meta — may not exist on all tokens
         let imageUrl = '', description = '', creator = ''
         try {
           const [img, desc, cr] = await Promise.all([
@@ -64,7 +71,9 @@ export async function GET() {
             client.readContract({ address: addr, abi: TOKEN_ABI, functionName: 'desc' }).catch(() => ''),
             client.readContract({ address: addr, abi: TOKEN_ABI, functionName: 'creator' }).catch(() => ''),
           ]) as [string, string, string]
-          imageUrl = img || ''; description = desc || ''; creator = cr || ''
+          imageUrl = img || ''
+          description = desc || ''
+          creator = cr || ''
         } catch (_) {}
 
         let bondedEth = 0, bondTarget = 3, graduated = false, armoryBalance = 0, lpAddress = ''
@@ -81,24 +90,40 @@ export async function GET() {
             const lp = await client.readContract({ address: curve, abi: CURVE_ABI, functionName: 'lpAddress' }).catch(() => '')
             lpAddress = lp as string
           }
-        } catch (_) {}
+        } catch (e: any) {
+          console.log('curve read failed for', curve, ':', e.message)
+        }
 
         try {
-          const bal = await client.readContract({ address: armory, abi: ARMORY_ABI, functionName: 'balance' })
+          const bal = await client.readContract({
+            address: armory,
+            abi: ARMORY_ABI,
+            functionName: 'balance'
+          })
           armoryBalance = parseFloat(formatEther(bal as bigint))
         } catch (_) {}
 
         const bondPercent = bondTarget > 0 ? Math.min(100, (bondedEth / bondTarget) * 100) : 0
         const badge: 'hot' | 'new' | 'trending' = bondPercent > 80 ? 'hot' : bondPercent < 10 ? 'new' : 'trending'
 
-        return { address: addr, name, symbol, imageUrl, description, creator, curve, armory, lpAddress, launchedAt: 0, graduated, bondedEth, bondTarget, bondPercent, armoryBalance, marketCap: Math.round(bondedEth * 1500 * 100), volume24h: 0, priceEth: 0, isRaiding: false, badge }
-      } catch (_) { return null }
+        return {
+          address: addr, name, symbol, imageUrl, description, creator,
+          curve, armory, lpAddress, launchedAt: 0, graduated,
+          bondedEth, bondTarget, bondPercent, armoryBalance,
+          marketCap: Math.round(bondedEth * 1500 * 100),
+          volume24h: 0, priceEth: 0, isRaiding: false, badge
+        }
+      } catch (e: any) {
+        console.log('token failed:', addr, e.message)
+        return null
+      }
     }))
 
     const result = { tokens: tokens.filter(Boolean), total: addresses.length }
-    cache = { data: result, ts: Date.now() }
-    return NextResponse.json(result, { headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' } })
+    return NextResponse.json(result)
+
   } catch (err: any) {
+    console.log('API error:', err.message)
     return NextResponse.json({ error: err.message, tokens: [], total: 0 }, { status: 500 })
   }
 }
