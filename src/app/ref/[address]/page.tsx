@@ -1,12 +1,14 @@
 'use client'
 import { useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 
 export default function RefPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const refAddress = params.address as string
+  const tokenAddress = searchParams.get('token')
 
   useEffect(() => {
     if (!refAddress || !refAddress.startsWith('0x')) {
@@ -19,10 +21,13 @@ export default function RefPage() {
       localStorage.setItem('bt_referrer_ts', Date.now().toString())
     } catch (_) {}
 
-    // Short delay to show the splash, then redirect
-    const t = setTimeout(() => router.push('/trenches'), 2000)
+    // Short delay to show the splash, then redirect to token page or trenches
+    const destination = tokenAddress && tokenAddress.startsWith('0x')
+      ? `/token/${tokenAddress}`
+      : '/trenches'
+    const t = setTimeout(() => router.push(destination), 2000)
     return () => clearTimeout(t)
-  }, [refAddress, router])
+  }, [refAddress, router, tokenAddress])
 
   const short = refAddress
     ? `${refAddress.slice(0, 6)}...${refAddress.slice(-4)}`

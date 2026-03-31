@@ -29,7 +29,11 @@ function MiniCard({ token, isPlaceholder }: { token: Partial<Token>, isPlacehold
       {isPlaceholder && <span style={{ position: 'absolute', top: '6px', right: '6px', fontFamily: 'Share Tech Mono, monospace', fontSize: '8px', color: 'var(--grey)' }}>DEMO</span>}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>🪖</div>
+          {token.imageUrl ? (
+            <img src={token.imageUrl} alt={token.symbol || ''} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)', flexShrink: 0 }} />
+          ) : (
+            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>🪖</div>
+          )}
           <div>
             <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '14px', color: 'var(--cream)' }}>${token.symbol}</div>
             <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', color: 'var(--grey-l)' }}>{token.name}</div>

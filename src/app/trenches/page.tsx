@@ -34,7 +34,11 @@ function TokenCard({ token, isPlaceholder }: { token: Partial<Token>, isPlacehol
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>🪖</div>
+          {token.imageUrl ? (
+            <img src={token.imageUrl} alt={token.symbol || ''} style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border)', flexShrink: 0 }} />
+          ) : (
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>🪖</div>
+          )}
           <div>
             <div style={{ fontFamily: 'Black Ops One, cursive', fontSize: '15px', color: 'var(--cream)' }}>${token.symbol}</div>
             <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: '10px', color: 'var(--grey-l)' }}>{token.name}</div>

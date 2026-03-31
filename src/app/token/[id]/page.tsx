@@ -133,7 +133,7 @@ export default function TokenPage() {
   }, [address])
 
   // Generate referral link
-  const refLink = userAddress ? `${typeof window !== 'undefined' ? window.location.origin : 'https://basedtrenches.fun'}/ref/${userAddress}` : ''
+  const refLink = userAddress ? `${typeof window !== 'undefined' ? window.location.origin : 'https://basedtrenches.fun'}/ref/${userAddress}?token=${address}` : ''
 
   function copyRefLink() {
     if (!refLink) return
@@ -296,9 +296,9 @@ export default function TokenPage() {
                   style={{ width: '100%', background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--cream)', fontFamily: 'Share Tech Mono, monospace', fontSize: '15px', padding: '10px', outline: 'none', boxSizing: 'border-box', marginBottom: '0.75rem' }} />
 
                 {tab === 'buy' && (
-                  <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.75rem' }}>
-                    {['0.01', '0.05', '0.1', '0.5'].map(v => (
-                      <button key={v} onClick={() => setAmount(v)} style={{ flex: 1, fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--copper)', background: 'rgba(184,112,64,0.08)', border: '1px solid rgba(184,112,64,0.2)', padding: '5px 0', cursor: 'crosshair' }}>{v}</button>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.4rem', marginBottom: '0.75rem' }}>
+                    {['0.005', '0.01', '0.025', '0.05', '0.1', '0.25', '0.5', '1.0'].map(v => (
+                      <button key={v} onClick={() => setAmount(v)} style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: amount === v ? '#060504' : 'var(--copper)', background: amount === v ? 'var(--copper)' : 'rgba(184,112,64,0.08)', border: '1px solid rgba(184,112,64,0.2)', padding: '5px 0', cursor: 'crosshair', transition: 'all 0.15s' }}>{v}</button>
                     ))}
                   </div>
                 )}
