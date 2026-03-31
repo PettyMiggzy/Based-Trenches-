@@ -64,32 +64,32 @@ export default function LaunchPage() {
     }
   }, [isSuccess, txHash])
 
-  const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const MAX = 400
-        let w = img.width, h = img.height
-        if (w > MAX) { h = Math.round(h * MAX / w); w = MAX }
-        canvas.width = w; canvas.height = h
-        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
-        resolve(canvas.toDataURL('image/jpeg', 0.6))
-      }
-      img.src = URL.createObjectURL(file)
-    })
-  }
-
   const handleImage = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) { setError('Please upload an image file'); return }
+    if (file.size > 2 * 1024 * 1024) { setError('Image must be under 2MB'); return }
     setError('')
     setUploading(true)
     try {
-      const compressed = await compressImage(file)
-      setImagePreview(compressed)
-      setImageUri(compressed)
+      // Show local preview immediately
+      const previewUrl = URL.createObjectURL(file)
+      setImagePreview(previewUrl)
+
+      // Upload to DO Spaces via API route
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if (!res.ok || !data.url) {
+        setError(data.error || 'Image upload failed')
+        setImagePreview('')
+        return
+      }
+
+      setImageUri(data.url)
     } catch {
       setError('Image upload failed')
+      setImagePreview('')
     } finally {
       setUploading(false)
     }
