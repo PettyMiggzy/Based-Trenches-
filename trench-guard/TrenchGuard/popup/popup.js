@@ -319,10 +319,12 @@ async function payPro() {
     btn.textContent = '⏳ CONFIRM IN WALLET...'
     btn.disabled = true
 
-    const hash = await window.ethereum.request({ method: 'eth_sendTransaction', params: [{
-      from: acct, to: PLATFORM, value: FEE_HEX,
-      data: '0x' + Array.from(new TextEncoder().encode('TrenchGuardPro')).map(b => b.toString(16).padStart(2,'0')).join('')
-    }]})
+    const _txp = { from: acct, to: PLATFORM, value: FEE_HEX,
+      data: '0x' + Array.from(new TextEncoder().encode('TrenchGuardPro')).map(b => b.toString(16).padStart(2,'0')).join('') }
+    // Pre-simulate so a would-revert tx never reaches the wallet (avoids the warning).
+    try { await window.ethereum.request({ method: 'eth_call', params: [_txp, 'latest'] }) }
+    catch (_e) { btn.textContent = 'TX WOULD FAIL — CHECK BALANCE'; btn.disabled = false; return }
+    const hash = await window.ethereum.request({ method: 'eth_sendTransaction', params: [_txp]})
 
     btn.textContent = '⏳ VERIFYING ON CHAIN...'
 

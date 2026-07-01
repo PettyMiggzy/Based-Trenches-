@@ -217,6 +217,15 @@ async function launchToken() {
 
     setDeployStatus('loading', 'Confirm in your wallet...')
 
+    // Pre-simulate the deploy so a would-revert tx never reaches the wallet
+    // (a reverting tx is the #1 cause of MetaMask/Blockaid 'can't verify' warnings).
+    try {
+      await window.ethereum.request({ method: 'eth_call', params: [{ from: walletAddress, to: FACTORY, value: LAUNCH_FEE, data: calldata }, 'latest'] })
+    } catch (_e) {
+      setDeployStatus('error', 'Transaction would fail — check inputs/fee and try again.')
+      return
+    }
+
     const txHash = await window.ethereum.request({
       method: 'eth_sendTransaction',
       params: [{
